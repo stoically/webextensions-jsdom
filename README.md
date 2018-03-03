@@ -20,16 +20,18 @@ const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/di
 
 Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
 
-`webExtension.background`: with properties `browser`, `dom` and `writeCoverate`
-`webExtension.popup`: with properties `browser`, `dom` and `writeCoverate`
+`webExtension.background`: with properties `browser`, `dom` and `writeCoverage`
+`webExtension.popup`: with properties `browser`, `dom` and `writeCoverage`
 
 
-#### Code Coverage with nyc / istanbul
+### Code Coverage
 
-Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test running `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `writeCoverage` function after each test.
+Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `writeCoverage` function after each test.
+
+If you want to know how that's possible you can [check out this excellent article by @freaktechnik](https://humanoids.be/log/2017/10/code-coverage-reports-for-webextensions/).
 
 
-#### Example
+### Example
 
 In your `manifest.json` you have popup and background defined:
 
