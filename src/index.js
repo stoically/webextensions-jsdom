@@ -44,7 +44,9 @@ class WebExtensionsJSDOM {
       path: backgroundPath,
       beforeParse(window) {
         window.browser = browser;
-        that.webExtensionsApiFake.fakeApi(window.browser);
+        if (options.apiFake) {
+          that.webExtensionsApiFake.fakeApi(window.browser);
+        }
 
         if (options && options.beforeParse) {
           options.beforeParse(window);
@@ -70,7 +72,9 @@ class WebExtensionsJSDOM {
       path: popupPath,
       beforeParse(window) {
         window.browser = browser;
-        that.webExtensionsApiFake.fakeApi(window.browser);
+        if (options.apiFake) {
+          that.webExtensionsApiFake.fakeApi(window.browser);
+        }
 
         if (that.webExtension.background) {
           window.browser.runtime.sendMessage.callsFake(function() {
@@ -112,12 +116,24 @@ const fromManifest = async (manifestPath, options = {}) => {
   if ((typeof options.background === 'undefined' || options.background) &&
       manifest.background && manifest.background.page) {
     const backgroundPath = path.resolve(manifestPath, manifest.background.page);
+    if (typeof options.background !== 'object') {
+      options.background = {};
+    }
+    if (typeof options.apiFake !== 'undefined') {
+      options.background.apiFake = options.apiFake;
+    }
     webExtension.background = await webExtensionJSDOM.buildBackground(backgroundPath, options.background);
   }
 
   if ((typeof options.popup === 'undefined' || options.popup) &&
       manifest.browser_action && manifest.browser_action.default_popup) {
     const popupPath = path.resolve(manifestPath, manifest.browser_action.default_popup);
+    if (typeof options.popup !== 'object') {
+      options.popup = {};
+    }
+    if (typeof options.apiFake !== 'undefined') {
+      options.popup.apiFake = options.apiFake;
+    }
     webExtension.popup = await webExtensionJSDOM.buildPopup(popupPath, options.popup);
   }
 
