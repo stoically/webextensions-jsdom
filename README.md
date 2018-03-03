@@ -20,7 +20,7 @@ const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/di
 
 Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
 
-`webExtension.background`: with `browser` and `dom`
+`webExtension.background`: with `browser` and `dom`  
 `webExtension.popup`: with `browser` and `dom`
 
 
