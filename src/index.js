@@ -96,8 +96,9 @@ class WebExtensionsJSDOM {
       browser,
       dom,
       document: dom.window.document,
-      writeCoverage: () => {
-        this.nyc.writeCoverage(dom.window);
+      destroy: async () => {
+        await this.nyc.writeCoverage(dom.window);
+        dom.window.close();
       }
     };
     if (options && options.afterBuild) {
@@ -141,8 +142,9 @@ class WebExtensionsJSDOM {
       dom,
       document: dom.window.document,
       helper,
-      writeCoverage: () => {
-        this.nyc.writeCoverage(dom.window);
+      destroy: async () => {
+        await this.nyc.writeCoverage(dom.window);
+        dom.window.close();
       }
     };
     if (options && options.afterBuild) {

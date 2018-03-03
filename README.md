@@ -20,13 +20,13 @@ const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/di
 
 Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
 
-`webExtension.background`: with properties `browser`, `dom` and `writeCoverage`
-`webExtension.popup`: with properties `browser`, `dom` and `writeCoverage`
+`webExtension.background`: with properties `browser`, `dom` and `destroy`
+`webExtension.popup`: with properties `browser`, `dom` and `destroy`
 
 
 ### Code Coverage
 
-Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `writeCoverage` function after each test.
+Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `webExtension.background` and/or `webExtension.popup` and the attached JSDOMs are no longer needed. This should ideally be after each test.
 
 If you want to know how that's possible you can [check out this excellent article by @freaktechnik](https://humanoids.be/log/2017/10/code-coverage-reports-for-webextensions/).
 
@@ -127,12 +127,12 @@ Returns an Promise that resolves with an object in case of success:
 * *background* `<object>`
   * *dom* `<object>` the JSDOM object
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
-  * *writeCoverage* `<function>` function that writes coverage data if executed with `nyc`
+  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
 
 * *popup* `<object>`
   * *dom* `<object>` the JSDOM object
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
-  * *writeCoverage* `<function>` function that writes coverage data if executed with `nyc`
+  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
   * *helper* `<object>`
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
