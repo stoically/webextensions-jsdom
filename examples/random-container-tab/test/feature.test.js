@@ -4,8 +4,7 @@ const chai = require('chai');
 chai.should();
 chai.use(sinonChai);
 
-//const webExtensionsJSDOM = require('webextensions-jsdom');
-const webExtensionsJSDOM = require('../../../src');
+const webExtensionsJSDOM = require('webextensions-jsdom');
 const manifestPath = path.resolve(path.join(__dirname, '../src'));
 
 describe('Random Container Tab', () => {
@@ -19,7 +18,7 @@ describe('Random Container Tab', () => {
       await webExtension.popup.helper.clickElementById('createRandomContainer');
     });
 
-    it.only('should create a container in the browser', async () => {
+    it('should create a container in the browser', async () => {
       webExtension.background.browser.contextualIdentities.create.should.have.been.calledOnce;
     });
 

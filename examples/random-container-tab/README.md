@@ -9,7 +9,7 @@ Much features. Much wow.
 ### Loading in Firefox
 
 * Navigate to `about:debugging` and load `src/manifest.json`
-* `web-ext run -s src`
+* or `web-ext run -s src`
 
 
 ### Running the tests
@@ -21,7 +21,7 @@ npm install
 npm test
 ```
 
-### Genrate coverage
+### Generating coverage
 
 If you want to see coverage you can by doing
 
@@ -30,4 +30,4 @@ npm install
 npm run coverage
 ```
 
-This will output % summary and output a more detailed report into the `coverage/` directory.
+This will show a % summary and output a more detailed report into the `coverage/` directory.
