@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "Random Container Tab",
+  "version": "0.0.1",
+
+  "description": "Example WebExtension that creates a tab in a random container",
+
+  "permissions": [
+    "cookies",
+    "contextualIdentities",
+    "storage"
+  ],
+
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "page": "background.html"
+  }
+}

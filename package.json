@@ -1,0 +1,24 @@
+{
+  "name": "webextensions-jsdom",
+  "version": "0.0.4",
+  "description": "WebExtensions JSDOM",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stoically/webextensions-jsdom.git"
+  },
+  "dependencies": {
+    "jsdom": "^11.6.2",
+    "webextensions-api-fake": "0.0.8"
+  },
+  "devDependencies": {
+    "eslint": "^4.18.2",
+    "mocha": "^5.0.1"
+  },
+  "homepage": "https://github.com/stoically/webextensions-jsom",
+  "author": "stoically <stoically@protonmail.com>",
+  "bugs": {
+    "url": "https://github.com/stoically/webextensions-jsom/issues"
+  },
+  "license": "MIT"
+}
