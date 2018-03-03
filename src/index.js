@@ -99,6 +99,7 @@ class WebExtensionsJSDOM {
       destroy: async () => {
         await this.nyc.writeCoverage(dom.window);
         dom.window.close();
+        delete this.webExtension.background;
       }
     };
     if (options && options.afterBuild) {
@@ -145,6 +146,7 @@ class WebExtensionsJSDOM {
       destroy: async () => {
         await this.nyc.writeCoverage(dom.window);
         dom.window.close();
+        delete this.webExtension.popup;
       }
     };
     if (options && options.afterBuild) {
