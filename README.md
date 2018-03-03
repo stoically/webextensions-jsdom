@@ -113,7 +113,7 @@ npm test
     * *afterBuild(popup)* `<function>` optional, executed after the dom is build
 
 
-Returns an object:
+Returns an Promise that resolves with an object in case of success:
 
 * *background* `<object>`
   * *dom* `<object>` the JSDOM object
@@ -124,3 +124,9 @@ Returns an object:
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
   * *helper* `<object>`
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
+
+
+
+### Limitations / TODO
+
+Currently only the exact manifest entries shown in the example are supported and it has to be a .html file.
