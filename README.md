@@ -11,6 +11,19 @@ Loading popup or background in JSDOM will automatically stub and fake `window.br
 npm install --save-dev webextensions-jsdom
 ```
 
+### Usage
+
+```js
+const webExtensionsJSDOM = require('webextensions-jsdom');
+const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/directory');
+```
+
+Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
+
+`webExtension.background`: with `browser` and `dom`
+`webExtension.popup`: with `browser` and `dom`
+
+
 
 #### Example
 
