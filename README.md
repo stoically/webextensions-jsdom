@@ -1,6 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browserAction popup or background page inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you easily load popup and background in JSDOM and with that makes it possible to e.g. click elements in the popup and then check if the background was called accordingly. `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. Loading only popup or background is also possible.
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browserAction popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you easily load popup and background in JSDOM and with that makes it possible to e.g. click elements in the popup and then check if the background was called accordingly. `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. Loading only popup or background is also possible.
 
 Loading popup or background in JSDOM will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome). [If you want](#api) you can also automatically fake the `browser` API using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake).
 
@@ -20,9 +20,13 @@ const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/di
 
 Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
 
-`webExtension.background`: with properties `browser` and `dom`  
-`webExtension.popup`: with properties `browser` and `dom`
+`webExtension.background`: with properties `browser`, `dom` and `writeCoverate`
+`webExtension.popup`: with properties `browser`, `dom` and `writeCoverate`
 
+
+#### Code Coverage with nyc / istanbul
+
+Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test running `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `writeCoverage` function after each test.
 
 
 #### Example
@@ -40,6 +44,9 @@ In your `manifest.json` you have popup and background defined:
   }
 }
 ```
+
+*Note: "scripts" are supported too.*
+
 
 In your `popup.js` loaded from `popup.html` you have something like this:
 
@@ -118,15 +125,12 @@ Returns an Promise that resolves with an object in case of success:
 * *background* `<object>`
   * *dom* `<object>` the JSDOM object
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  * *writeCoverage* `<function>` function that writes coverage data if executed with `nyc`
 
 * *popup* `<object>`
   * *dom* `<object>` the JSDOM object
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  * *writeCoverage* `<function>` function that writes coverage data if executed with `nyc`
   * *helper* `<object>`
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
-
-
-### Limitations / TODO
-
-Currently only the exact manifest entries shown in the example are supported and it has to be a .html file.

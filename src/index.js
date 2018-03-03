@@ -2,46 +2,70 @@ const fs = require('fs');
 const path = require('path');
 const jsdom = require('jsdom');
 const {WebExtensionsApiFake} = require('webextensions-api-fake');
-
-const nextTick = () => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      process.nextTick(resolve);
-    });
-  });
-};
+const nyc = require('./nyc');
 
 class WebExtensionsJSDOM {
   constructor() {
     this.webExtensionsApiFake = new WebExtensionsApiFake;
-    this.webExtension = {
-      nextTick
-    };
+    this.webExtension = {};
+
+    this.nyc = new nyc;
   }
 
-  async buildDom(options = {}) {
+  nextTick() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        process.nextTick(resolve);
+      });
+    });
+  }
+
+  async buildDom(options = {}, html = false, scripts = false) {
+    const virtualConsole = new jsdom.VirtualConsole;
+    virtualConsole.sendTo(console);
+    virtualConsole.on('jsdomError', (error) => {
+      // eslint-disable-next-line no-console
+      console.error(error.stack, error.detail);
+    });
+
     const jsdomOptions = Object.assign({
-      runScripts: 'dangerously',
+      runScripts: 'outside-only',
       resources: 'usable',
-      virtualConsole: (new jsdom.VirtualConsole).sendTo(console)
+      virtualConsole
     }, options);
 
-    const dom = await jsdom.JSDOM.fromFile(options.path, jsdomOptions);
-
-    await new Promise(resolve => {
-      dom.window.document.addEventListener('DOMContentLoaded', resolve);
-    });
-    await nextTick();
+    let dom;
+    let scriptSrcs = '';
+    if (!html) {
+      dom = await jsdom.JSDOM.fromFile(options.path, jsdomOptions);
+      const scripts = dom.window.document.getElementsByTagName('script');
+      for (const script of [...scripts]) {
+        const scriptSrc = script.src.replace(/^file:\/\//, '');
+        scriptSrcs += await this.nyc.instrument(scriptSrc, 'utf-8');
+        // eslint-disable-next-line quotes
+        scriptSrcs += ";\n;";
+      }
+    } else {
+      dom = new jsdom.JSDOM(html, jsdomOptions);
+      for (const script of scripts) {
+        const scriptSrc = script.replace(/^file:\/\//, '');
+        scriptSrcs += await this.nyc.instrument(scriptSrc, 'utf-8');
+        // eslint-disable-next-line quotes
+        scriptSrcs += ";\n;";
+      }
+    }
+    dom.window.eval(scriptSrcs);
+    await this.nextTick();
 
     return dom;
   }
 
-  async buildBackground(backgroundPath, options = {}) {
+  async buildBackground(background, manifestPath, options = {}) {
     const browser = this.webExtensionsApiFake.createBrowser();
     const that = this;
     browser.contextMenus = browser.menus;
-    const dom = await this.buildDom({
-      path: backgroundPath,
+
+    const buildDomOptions = {
       beforeParse(window) {
         window.browser = browser;
         if (options.apiFake) {
@@ -52,11 +76,29 @@ class WebExtensionsJSDOM {
           options.beforeParse(window);
         }
       }
-    });
+    };
+
+    let dom;
+    if (background.page) {
+      const backgroundPath = path.resolve(manifestPath, background.page);
+      buildDomOptions.path = backgroundPath;
+      dom = await this.buildDom(buildDomOptions);
+    } else if (background.scripts) {
+      const html = '<!DOCTYPE html><html><head></head><body></body></html>';
+      const scripts = [];
+      for (const script of background.scripts) {
+        scripts.push(path.resolve(path.join(manifestPath, script)));
+      }
+      dom = await this.buildDom(buildDomOptions, html, scripts);
+    }
+
     this.webExtension.background = {
       browser,
       dom,
-      document: dom.window.document
+      document: dom.window.document,
+      writeCoverage: () => {
+        this.nyc.writeCoverage(dom.window);
+      }
     };
     if (options && options.afterBuild) {
       await options.afterBuild(this.webExtension.background);
@@ -91,14 +133,17 @@ class WebExtensionsJSDOM {
     const helper = {
       async clickElementById(id) {
         dom.window.document.getElementById(id).click();
-        await nextTick();
+        await this.nextTick();
       }
     };
     this.webExtension.popup = {
       browser,
       dom,
       document: dom.window.document,
-      helper
+      helper,
+      writeCoverage: () => {
+        this.nyc.writeCoverage(dom.window);
+      }
     };
     if (options && options.afterBuild) {
       await options.afterBuild(this.webExtension.popup);
@@ -114,15 +159,15 @@ const fromManifest = async (manifestPath, options = {}) => {
 
   const webExtension = {};
   if ((typeof options.background === 'undefined' || options.background) &&
-      manifest.background && manifest.background.page) {
-    const backgroundPath = path.resolve(manifestPath, manifest.background.page);
+      manifest.background &&
+      (manifest.background.page || manifest.background.scripts)) {
     if (typeof options.background !== 'object') {
       options.background = {};
     }
     if (typeof options.apiFake !== 'undefined') {
       options.background.apiFake = options.apiFake;
     }
-    webExtension.background = await webExtensionJSDOM.buildBackground(backgroundPath, options.background);
+    webExtension.background = await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
   }
 
   if ((typeof options.popup === 'undefined' || options.popup) &&
