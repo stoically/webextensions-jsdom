@@ -98,12 +98,7 @@ describe('Example', () => {
 });
 ```
 
-You can find a fully functional example in `examples/random-container-tab`. Loading the `src/manifest.json` in Firefox using `about:debugging` or `web-ext` adds a toolbar icon, clicking it reveals a popup with two buttons. One to create a random container which you click first, after that click the button to create a tab in the last created random container and it'll open a tab accordingly. In `test/feature.test.js` you find a feature test which you can execute by doing
-
-```
-npm install
-npm test
-```
+You can find a fully functional example in [`examples/random-container-tab`](examples/random-container-tab).
 
 
 

@@ -54,7 +54,29 @@ class WebExtensionsJSDOM {
         scriptSrcs += ";\n;";
       }
     }
+
+    const domLoadedPromise = new Promise(resolve => {
+      dom.window.document.addEventListener('DOMContentLoaded', () => {
+        resolve();
+      });
+    });
+
     dom.window.eval(scriptSrcs);
+
+    await new Promise(async resolve => {
+      if (dom.window.document.readyState === 'complete') {
+        const event = new dom.window.Event('DOMContentLoaded');
+        dom.window.document.dispatchEvent(event);
+        if (typeof dom.window.document.onreadystatechange === 'function') {
+          dom.window.document.onreadystatechange();
+        }
+        resolve();
+      } else {
+        await domLoadedPromise;
+        resolve();
+      }
+    });
+
     await this.nextTick();
 
     return dom;
@@ -133,7 +155,7 @@ class WebExtensionsJSDOM {
       }
     });
     const helper = {
-      async clickElementById(id) {
+      clickElementById: async (id) => {
         dom.window.document.getElementById(id).click();
         await this.nextTick();
       }
