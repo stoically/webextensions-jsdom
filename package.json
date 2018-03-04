@@ -1,6 +1,6 @@
 {
   "name": "webextensions-jsdom",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "WebExtensions JSDOM",
   "main": "src/index.js",
   "repository": {
