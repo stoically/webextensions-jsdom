@@ -33,12 +33,25 @@ class WebExtensionsJSDOM {
       } else {
         dom = new jsdom.JSDOM(this.htmlTemplate(scripts), jsdomOptions);
       }
-
-      await new Promise(resolve => {
-        dom.window.document.addEventListener('DOMContentLoaded', resolve);
-      });
     } else {
       dom = await this.nyc.buildDom(options, scripts, jsdomOptions);
+    }
+
+    if (dom.window.document.readyState !== 'complete') {
+      await new Promise(resolve => {
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
+        // wait until "load" event because that indicates "complete"
+        // "readystatechange" doesn't seem to fire with jsdom
+        // nor is the readystatechange function called, so we do that
+        dom.window.addEventListener('load', () => {
+          const readystatechangeEvent = new dom.window.Event('readystatechange');
+          dom.window.document.dispatchEvent(readystatechangeEvent);
+          if (typeof dom.window.document.onreadystatechange === 'function') {
+            dom.window.document.onreadystatechange();
+          }
+          resolve();
+        });
+      });
     }
 
     await this.nextTick();
@@ -158,7 +171,6 @@ class WebExtensionsJSDOM {
 
 const fromManifest = async (manifestFilePath, options = {}) => {
   const webExtensionJSDOM = new WebExtensionsJSDOM(options);
-  manifestFilePath = path.resolve(manifestFilePath);
   const manifestPath = path.dirname(manifestFilePath);
   const manifest = JSON.parse(fs.readFileSync(manifestFilePath));
 

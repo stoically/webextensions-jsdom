@@ -52,27 +52,24 @@ class nyc {
       scriptsSource += ";\n;";
     }
 
-    const domLoadedPromise = new Promise(resolve => {
-      dom.window.document.addEventListener('DOMContentLoaded', () => {
-        resolve();
-      });
-    });
+    let refireStatechangeEvents = dom.window.document.readyState === 'complete';
 
     dom.window.eval(scriptsSource);
 
-    await new Promise(async resolve => {
-      if (dom.window.document.readyState === 'complete') {
-        const event = new dom.window.Event('DOMContentLoaded');
-        dom.window.document.dispatchEvent(event);
-        if (typeof dom.window.document.onreadystatechange === 'function') {
-          dom.window.document.onreadystatechange();
-        }
-        resolve();
-      } else {
-        await domLoadedPromise;
-        resolve();
+    if (refireStatechangeEvents) {
+      // jsdom already finished loading the initial dom before we injected the
+      // the eval scripts, so they wont see maybe necessary statechange events
+      // that's why we refire them
+      const DOMContentLoadedEvent = new dom.window.Event('DOMContentLoaded');
+      dom.window.document.dispatchEvent(DOMContentLoadedEvent);
+      const loadEvent = new dom.window.Event('load');
+      dom.window.dispatchEvent(loadEvent);
+      const readystatechangeEvent = new dom.window.Event('readystatechange');
+      dom.window.document.dispatchEvent(readystatechangeEvent);
+      if (typeof dom.window.document.onreadystatechange === 'function') {
+        dom.window.document.onreadystatechange();
       }
-    });
+    }
 
     return dom;
   }
