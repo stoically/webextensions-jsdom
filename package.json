@@ -1,6 +1,6 @@
 {
   "name": "webextensions-jsdom",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "WebExtensions JSDOM",
   "main": "src/index.js",
   "repository": {
@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "jsdom": "^11.6.2",
-    "webextensions-api-fake": "0.0.8"
+    "mkdirp": "^0.5.1",
+    "webextensions-api-fake": "^0.0.8"
   },
   "devDependencies": {
     "eslint": "^4.18.2",
