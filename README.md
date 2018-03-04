@@ -23,7 +23,7 @@ Given your `manifest.json` has a default_popup and background page or scripts, `
 `background`: with properties `browser` , `dom` and `destroy`  
 `popup`: with properties `browser`, `dom` and `destroy`  
 
-`browser` is a new `sinon-chrome/webextensions` instance. `dom` is a JSDOM instance. `destroy` is a function to clean up and maybe generate coverage. More infos in the [API Docs][#api].
+`browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `window.browser`. `dom` is a JSDOM instance. `destroy` is a function to clean up and maybe generate coverage. More infos in the [API Docs](#api).
 
 
 ### Code Coverage
