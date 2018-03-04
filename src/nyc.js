@@ -8,6 +8,7 @@
 const path = require('path');
 const util = require('util');
 const fs = require('fs');
+const jsdom = require('jsdom');
 const _mkdirp = require('mkdirp');
 const _execFile = require('child_process').execFile;
 const writeFile = util.promisify(fs.writeFile);
@@ -30,6 +31,52 @@ class nyc {
       mkdirp(this._instrumentsCachePath);
     }
   }
+
+  async buildDom(options, scripts, jsdomOptions) {
+    jsdomOptions.runScripts = 'outside-only';
+    let dom;
+    let scriptsSource = '';
+    if (!scripts) {
+      dom = await jsdom.JSDOM.fromFile(options.path, jsdomOptions);
+      const scriptsEls = dom.window.document.getElementsByTagName('script');
+      scripts = [...scriptsEls];
+    } else {
+      const html = '<!DOCTYPE html><html><head></head><body></body></html>';
+      dom = new jsdom.JSDOM(html, jsdomOptions);
+    }
+
+    for (const script of scripts) {
+      const scriptPath = script.src ? script.src.replace(/^file:\/\//, '') : script;
+      scriptsSource += await this.instrument(scriptPath, 'utf-8');
+      // eslint-disable-next-line quotes
+      scriptsSource += ";\n;";
+    }
+
+    const domLoadedPromise = new Promise(resolve => {
+      dom.window.document.addEventListener('DOMContentLoaded', () => {
+        resolve();
+      });
+    });
+
+    dom.window.eval(scriptsSource);
+
+    await new Promise(async resolve => {
+      if (dom.window.document.readyState === 'complete') {
+        const event = new dom.window.Event('DOMContentLoaded');
+        dom.window.document.dispatchEvent(event);
+        if (typeof dom.window.document.onreadystatechange === 'function') {
+          dom.window.document.onreadystatechange();
+        }
+        resolve();
+      } else {
+        await domLoadedPromise;
+        resolve();
+      }
+    });
+
+    return dom;
+  }
+
 
   async instrument(sourcePath) {
     if (instrumentCache.has(sourcePath)) {

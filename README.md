@@ -15,13 +15,15 @@ npm install --save-dev webextensions-jsdom
 
 ```js
 const webExtensionsJSDOM = require('webextensions-jsdom');
-const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest/directory');
+const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest.json');
 ```
 
-Given your `manifest.json` has a default_popup and background page `webExtension` now has two properties:
+Given your `manifest.json` has a default_popup and background page or scripts, `webExtension` now has two properties:
 
-`webExtension.background`: with properties `browser`, `dom` and `destroy`  
-`webExtension.popup`: with properties `browser`, `dom` and `destroy`  
+`background`: with properties `browser` , `dom` and `destroy`  
+`popup`: with properties `browser`, `dom` and `destroy`  
+
+`browser` is a new `sinon-chrome/webextensions` instance. `dom` is a JSDOM instance. `destroy` is a function to clean up and maybe generate coverage. More infos in the [API Docs][#api].
 
 
 ### Code Coverage
@@ -33,7 +35,7 @@ If you want to know how that's possible you can [check out this excellent articl
 
 ### Example
 
-In your `manifest.json` you have popup and background defined:
+In your `manifest.json` you have default_popup and background page defined:
 
 ```json
 {
