@@ -61,7 +61,7 @@ class nyc {
     if (!this._nyc_config) {
       return;
     }
-    const jsonFile = `${Date.now()}_${process.pid}_${++this._coverage_id}.json`;
+    const jsonFile = `${crypto.randomBytes(32).toString('hex')}.json`;
     const coverageJson = JSON.stringify(window.__coverage__);
     await writeFile(path.join(this._nyc_config.tempDirectory, jsonFile), coverageJson, 'utf-8');
   }
