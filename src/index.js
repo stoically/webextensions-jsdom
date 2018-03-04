@@ -7,8 +7,8 @@ const {WebExtensionsApiFake} = require('webextensions-api-fake');
 const nyc = require('./nyc');
 
 class WebExtensionsJSDOM {
-  constructor() {
-    this.webExtensionsApiFake = new WebExtensionsApiFake;
+  constructor(options = {}) {
+    this.webExtensionsApiFake = new WebExtensionsApiFake(options);
     this.webExtension = {};
 
     this.nyc = new nyc;
@@ -184,11 +184,13 @@ class WebExtensionsJSDOM {
 }
 
 const fromManifest = async (manifestPath, options = {}) => {
-  const webExtensionJSDOM = new WebExtensionsJSDOM;
+  const webExtensionJSDOM = new WebExtensionsJSDOM(options);
   const manifestFilePath = path.resolve(manifestPath, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestFilePath));
 
-  const webExtension = {};
+  const webExtension = {
+    webExtensionJSDOM
+  };
   if ((typeof options.background === 'undefined' || options.background) &&
       manifest.background &&
       (manifest.background.page || manifest.background.scripts)) {
