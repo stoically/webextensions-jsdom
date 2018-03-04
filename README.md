@@ -74,7 +74,7 @@ To test this with `webextensions-jsdom` you can do (using `mocha`, `chai` and `s
 const path = require('path');
 const sinonChai = require('sinon-chai');
 const chai = require('chai');
-chai.should();
+const expect = chai.expect;
 chai.use(sinonChai);
 
 const webExtensionsJSDOM = require('webextensions-jsdom');
@@ -92,7 +92,9 @@ describe('Example', () => {
     });
 
     it('should call the background', async () => {
-      webExtension.background.browser.onMessage.addListener.should.have.been.calledOnce;
+      expect(webExtension.background.browser.onMessage.addListener).to.have.been.calledWithMatch({
+        method: 'usefulMessage'
+      });
     });
   });
 });

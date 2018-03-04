@@ -1,7 +1,7 @@
 const path = require('path');
 const sinonChai = require('sinon-chai');
 const chai = require('chai');
-chai.should();
+const expect = chai.expect;
 chai.use(sinonChai);
 
 const webExtensionsJSDOM = require('webextensions-jsdom');
@@ -19,7 +19,7 @@ describe('Random Container Tab', () => {
     });
 
     it('should create a container in the browser', async () => {
-      webExtension.background.browser.contextualIdentities.create.should.have.been.calledOnce;
+      expect(webExtension.background.browser.contextualIdentities.create).to.have.been.calledOnce;
     });
 
     describe('Then clicking Create Tab in last created Random Container', () => {
@@ -29,7 +29,7 @@ describe('Random Container Tab', () => {
 
       it('should create a tab in the correct container', async () => {
         const createdRandomContainer = await webExtension.background.browser.contextualIdentities.create.firstCall.returnValue;
-        webExtension.background.browser.tabs.create.should.have.been.calledWithMatch({
+        expect(webExtension.background.browser.tabs.create).to.have.been.calledWithMatch({
           cookieStoreId: createdRandomContainer.cookieStoreId
         });
       });
