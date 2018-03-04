@@ -35,24 +35,20 @@ class WebExtensionsJSDOM {
     }, options);
 
     let dom;
-    let scriptSrcs = '';
+    let scriptsSource = '';
     if (!html) {
       dom = await jsdom.JSDOM.fromFile(options.path, jsdomOptions);
-      const scripts = dom.window.document.getElementsByTagName('script');
-      for (const script of [...scripts]) {
-        const scriptSrc = script.src.replace(/^file:\/\//, '');
-        scriptSrcs += await this.nyc.instrument(scriptSrc, 'utf-8');
-        // eslint-disable-next-line quotes
-        scriptSrcs += ";\n;";
-      }
+      const scriptsEls = dom.window.document.getElementsByTagName('script');
+      scripts = [...scriptsEls];
     } else {
       dom = new jsdom.JSDOM(html, jsdomOptions);
-      for (const script of scripts) {
-        const scriptSrc = script.replace(/^file:\/\//, '');
-        scriptSrcs += await this.nyc.instrument(scriptSrc, 'utf-8');
-        // eslint-disable-next-line quotes
-        scriptSrcs += ";\n;";
-      }
+    }
+
+    for (const script of scripts) {
+      const scriptSrc = script.replace(/^file:\/\//, '');
+      scriptsSource += await this.nyc.instrument(scriptSrc, 'utf-8');
+      // eslint-disable-next-line quotes
+      scriptsSource += ";\n;";
     }
 
     const domLoadedPromise = new Promise(resolve => {
@@ -61,7 +57,7 @@ class WebExtensionsJSDOM {
       });
     });
 
-    dom.window.eval(scriptSrcs);
+    dom.window.eval(scriptsSource);
 
     await new Promise(async resolve => {
       if (dom.window.document.readyState === 'complete') {
