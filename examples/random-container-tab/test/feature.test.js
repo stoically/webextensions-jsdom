@@ -5,7 +5,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 const webExtensionsJSDOM = require('webextensions-jsdom');
-const manifestPath = path.resolve(path.join(__dirname, '../src'));
+const manifestPath = path.resolve(path.join(__dirname, '../src/manifest.json'));
 
 describe('Random Container Tab', () => {
   let webExtension;
