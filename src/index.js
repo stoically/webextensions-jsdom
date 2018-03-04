@@ -45,8 +45,8 @@ class WebExtensionsJSDOM {
     }
 
     for (const script of scripts) {
-      const scriptSrc = script.replace(/^file:\/\//, '');
-      scriptsSource += await this.nyc.instrument(scriptSrc, 'utf-8');
+      const scriptPath = script.src ? script.src.replace(/^file:\/\//, '') : script;
+      scriptsSource += await this.nyc.instrument(scriptPath, 'utf-8');
       // eslint-disable-next-line quotes
       scriptsSource += ";\n;";
     }
