@@ -22,7 +22,9 @@ class nyc {
   constructor() {
     this._coverage_id = 0;
     this._nyc_config = false;
+    this.running = false;
     if (process.env.NYC_CONFIG) {
+      this.running = true;
       this._nyc_config = JSON.parse(process.env.NYC_CONFIG);
       this._instrumentsCachePath = path.resolve(path.join(this._nyc_config.tempDirectory, 'instruments'));
       mkdirp(this._instrumentsCachePath);
@@ -30,31 +32,27 @@ class nyc {
   }
 
   async instrument(sourcePath) {
-    if(!instrumentCache.has(sourcePath)) {
-      if(!this._nyc_config) {
-        const source = await readFile(sourcePath, 'utf8');
-        instrumentCache.set(sourcePath, source);
-      } else {
-        // first pipe to disk and then read it
-        // huge files with a lot of stdout make problems otherwise
-        const sourceMd5 = crypto.createHash('md5').update(sourcePath).digest('hex');
-        const instrumentCachePath = path.join(this._instrumentsCachePath, sourceMd5);
-        await execFile(process.execPath, [
-          './node_modules/.bin/nyc',
-          'instrument',
-          sourcePath,
-          '>',
-          instrumentCachePath
-        ], {
-          cwd: process.cwd(),
-          env: process.env,
-          shell: true
-        });
-        const source = await readFile(instrumentCachePath, 'utf8');
-        instrumentCache.set(sourcePath, source);
-      }
+    if (instrumentCache.has(sourcePath)) {
+      return instrumentCache.get(sourcePath);
     }
-    return instrumentCache.get(sourcePath);
+    // first pipe to disk and then read it
+    // huge files with a lot of stdout make problems otherwise
+    const sourceMd5 = crypto.createHash('md5').update(sourcePath).digest('hex');
+    const instrumentCachePath = path.join(this._instrumentsCachePath, sourceMd5);
+    await execFile(process.execPath, [
+      './node_modules/.bin/nyc',
+      'instrument',
+      sourcePath,
+      '>',
+      instrumentCachePath
+    ], {
+      cwd: process.cwd(),
+      env: process.env,
+      shell: true
+    });
+    const source = await readFile(instrumentCachePath, 'utf8');
+    instrumentCache.set(sourcePath, source);
+    return source;
   }
 
   async writeCoverage(window) {

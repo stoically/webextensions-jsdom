@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const jsdom = require('jsdom');
+const util = require('util');
+const readFile = util.promisify(fs.readFile);
 const {WebExtensionsApiFake} = require('webextensions-api-fake');
 const nyc = require('./nyc');
 
@@ -46,7 +48,12 @@ class WebExtensionsJSDOM {
 
     for (const script of scripts) {
       const scriptPath = script.src ? script.src.replace(/^file:\/\//, '') : script;
-      scriptsSource += await this.nyc.instrument(scriptPath, 'utf-8');
+      if (!this.nyc.running) {
+        const source = await readFile(scriptPath, 'utf8');
+        scriptsSource += source;
+      } else {
+        scriptsSource += await this.nyc.instrument(scriptPath, 'utf-8');
+      }
       // eslint-disable-next-line quotes
       scriptsSource += ";\n;";
     }
