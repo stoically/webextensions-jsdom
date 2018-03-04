@@ -113,6 +113,7 @@ class WebExtensionsJSDOM {
     this.webExtension.background = {
       browser,
       dom,
+      window: dom.window,
       document: dom.window.document,
       destroy: async () => {
         await this.nyc.writeCoverage(dom.window);
@@ -159,6 +160,7 @@ class WebExtensionsJSDOM {
     this.webExtension.popup = {
       browser,
       dom,
+      window: dom.window,
       document: dom.window.document,
       helper,
       destroy: async () => {
