@@ -1,8 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browserAction popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you easily load popup and background in JSDOM and with that makes it possible to e.g. click elements in the popup and then check if the background was called accordingly. `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. Loading only popup or background is also possible.
-
-Loading popup or background in JSDOM will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome). [If you want](#api) you can also automatically fake the `browser` API using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake).
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you easily do exactly that with just one command. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
 
 
 ### Installation
@@ -15,20 +13,30 @@ npm install --save-dev webextensions-jsdom
 
 ```js
 const webExtensionsJSDOM = require('webextensions-jsdom');
-const webExtension = await webExtensionsJSDOM.fromManifest('/path/to/manifest.json');
+const webExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json');
 ```
 
-Given your `manifest.json` has a default_popup and background page or scripts, `webExtension` now has two properties:
+Given your `manifest.json` has a browser_action default_popup and background page or scripts, `webExtension` now has two properties:
 
-`background`: with properties `browser` , `dom` and `destroy`  
-`popup`: with properties `browser`, `dom` and `destroy`  
+`background`: with properties `dom`, `browser` and `destroy`  
+`popup`: with properties `dom`, `browser` and `destroy`  
 
-`browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `window.browser`. `dom` is a JSDOM instance. `destroy` is a function to clean up and maybe generate coverage. More infos in the [API Docs](#api).
+`dom` is a new JSDOM instance. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API Docs](#api).
+
+
+### Automatic wiring
+
+If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
+
+
+### API Fake
+
+There's an option to automatically apply [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) to the `browser` stubs. It will imitate some of the WebExtensions API behavior (like an in-memory `storage`), so you don't have to manually define behavior. This is especially useful when feature-testing.
 
 
 ### Code Coverage
 
-Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `webExtension.background` and/or `webExtension.popup` and the attached JSDOMs are no longer needed. This should ideally be after each test.
+Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `background` and/or `popup` are no longer needed. This should ideally be after each test.
 
 If you want to know how that's possible you can [check out this excellent article by @freaktechnik](https://humanoids.be/log/2017/10/code-coverage-reports-for-webextensions/).
 
@@ -80,7 +88,7 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 const webExtensionsJSDOM = require('webextensions-jsdom');
-const manifestPath = path.resolve(__dirname);
+const manifestPath = path.resolve(path.join(__dirname, 'path/to/manifest.json'));
 
 describe('Example', () => {
   let webExtension;
@@ -102,7 +110,7 @@ describe('Example', () => {
 });
 ```
 
-You can find a fully functional example in [`examples/random-container-tab`](examples/random-container-tab).
+There's a fully functional example in [`examples/random-container-tab`](examples/random-container-tab).
 
 
 
@@ -110,7 +118,7 @@ You can find a fully functional example in [`examples/random-container-tab`](exa
 
 #### Exported function fromManifest(path[, options])
 
-* *path* `<string>`, required, path to the directory where the `manifest.json` is located in
+* *path* `<string>`, required, absolute path to the `manifest.json` file
 * *options* `<object>`, optional
   * *apiFake* `<boolean>` optional, if true automatically applies API fakes to the `browser` using `webextensions-api-fake`
   * *background* `<object>` optional, if false is given background wont be loaded
