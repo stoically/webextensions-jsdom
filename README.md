@@ -26,13 +26,13 @@ Given your `manifest.json` has a browser_action default_popup and background pag
 
 #### Chrome Extensions
 
-Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing the `api` option and turning off wiring:
+Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing `api: 'chrome'` to the options:
 
 ```js
-const chromeExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {api: 'chrome'});
+await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {api: 'chrome'});
 ```
 
-You get the same results but can use `chrome` instead of `browser`. However, the included examples are geared towards WebExtensions and use async/await syntax.
+You get the same results but can use `chrome` instead of `browser`. However, the examples shown here are geared towards WebExtensions and use async/await syntax.
 
 Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api-fake) with the chrome api (yet).
 
@@ -42,7 +42,7 @@ Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api
 If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background if you pass the `wiring: true` option. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
 
 ```js
-webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {wiring: true});
+await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {wiring: true});
 ```
 
 
@@ -51,7 +51,7 @@ webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {wiring: true
 Passing `apiFake: true` in the options to `fromManifest` automatically applies [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) to the `browser` stubs. It will imitate some of the WebExtensions API behavior (like an in-memory `storage`), so you don't have to manually define behavior. This is especially useful when feature-testing.
 
 ```js
-webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {apiFake: true});
+await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {apiFake: true});
 ```
 
 
@@ -141,15 +141,16 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 
 * *path* `<string>`, required, absolute path to the `manifest.json` file
 * *options* `<object>`, optional
-  * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
-  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
-  * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
   * *background* `<object|false>` optional, if `false` is given background wont be loaded
     * *beforeParse(window)* `<function>` optional, JSDOM beforeParse function
     * *afterBuild(background)* `<function>` optional, executed after the dom is build
   * *popup* `<object|false>` optional, if `false` is given popup wont be loaded
     * *beforeParse(window)* `<function>` optional, JSDOM beforeParse function
     * *afterBuild(popup)* `<function>` optional, executed after the dom is build
+  * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
+  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
+  * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
+  * *sinon* `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
 
 
 Returns a Promise that resolves with an object in case of success:
