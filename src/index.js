@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const jsdom = require('jsdom');
+const sinon = require('sinon');
 const {WebExtensionsApiFake} = require('webextensions-api-fake');
 const nyc = require('./nyc');
 
@@ -8,6 +9,7 @@ class WebExtensionsJSDOM {
   constructor(options = {}) {
     this.webExtensionsApiFake = new WebExtensionsApiFake(options);
     this.webExtension = {};
+    this.sinon = options.sinon || sinon;
 
     this.nyc = new nyc;
   }
@@ -19,11 +21,17 @@ class WebExtensionsJSDOM {
       // eslint-disable-next-line no-console
       console.error(error.stack, error.detail);
     });
-
     const jsdomOptions = Object.assign({
       resources: 'usable',
       virtualConsole
     }, options);
+
+    jsdomOptions.beforeParse = (window) => {
+      this.stubWindowApis(window);
+      if (options.beforeParse) {
+        options.beforeParse(window);
+      }
+    };
 
     let dom;
     if (!this.nyc.running) {
@@ -158,6 +166,12 @@ class WebExtensionsJSDOM {
       await options.afterBuild(this.webExtension.popup);
     }
     return this.webExtension.popup;
+  }
+
+  stubWindowApis(window) {
+    window.fetch = this.sinon.stub().resolves({
+      json: this.sinon.stub().resolves({})
+    });
   }
 
   nextTick() {
