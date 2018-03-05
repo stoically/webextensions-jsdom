@@ -10,7 +10,7 @@ class WebExtensionsJSDOM {
     this.webExtensionsApiFake = new WebExtensionsApiFake(options);
     this.webExtension = {};
     this.sinon = options.sinon || sinon;
-    this.wiring = options.wiring || true;
+    this.wiring = options.wiring || false;
 
     this.nyc = new nyc;
   }
@@ -81,6 +81,7 @@ class WebExtensionsJSDOM {
     const buildDomOptions = {
       beforeParse(window) {
         window.browser = browser;
+        window.chrome = browser;
         if (options.apiFake) {
           that.webExtensionsApiFake.fakeApi(window.browser);
         }
@@ -106,6 +107,7 @@ class WebExtensionsJSDOM {
 
     this.webExtension.background = {
       browser,
+      chrome: browser,
       dom,
       window: dom.window,
       document: dom.window.document,
@@ -129,6 +131,7 @@ class WebExtensionsJSDOM {
       path: popupPath,
       beforeParse(window) {
         window.browser = browser;
+        window.chrome = browser;
         if (options.apiFake) {
           that.webExtensionsApiFake.fakeApi(window.browser);
         }
@@ -162,6 +165,7 @@ class WebExtensionsJSDOM {
     };
     this.webExtension.popup = {
       browser,
+      chrome: browser,
       dom,
       window: dom.window,
       document: dom.window.document,

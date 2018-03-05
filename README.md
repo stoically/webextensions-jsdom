@@ -24,14 +24,35 @@ Given your `manifest.json` has a browser_action default_popup and background pag
 `dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API Docs](#api).
 
 
+#### Chrome Extensions
+
+Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing the `api` option and turning off wiring:
+
+```js
+const chromeExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {api: 'chrome'});
+```
+
+You get the same results but can use `chrome` instead of `browser`. However, the included examples are geared towards WebExtensions and use async/await syntax.
+
+Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api-fake) with the chrome api (yet).
+
+
 ### Automatic wiring
 
-If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing. It's possible to pass `wiring: false` to the `fromManifest` options to disable automatic wiring.
+If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background if you pass the `wiring: true` option. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
+
+```js
+webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {wiring: true});
+```
 
 
 ### API Fake
 
 Passing `apiFake: true` in the options to `fromManifest` automatically applies [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) to the `browser` stubs. It will imitate some of the WebExtensions API behavior (like an in-memory `storage`), so you don't have to manually define behavior. This is especially useful when feature-testing.
+
+```js
+webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {apiFake: true});
+```
 
 
 ### Code Coverage
@@ -120,8 +141,9 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 
 * *path* `<string>`, required, absolute path to the `manifest.json` file
 * *options* `<object>`, optional
+  * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
-  * *wiring* `<boolean>` optional, if `false` the [automatic wiring](#automatic-wiring) is disabled
+  * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
   * *background* `<object|false>` optional, if `false` is given background wont be loaded
     * *beforeParse(window)* `<function>` optional, JSDOM beforeParse function
     * *afterBuild(background)* `<function>` optional, executed after the dom is build

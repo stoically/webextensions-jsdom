@@ -10,7 +10,7 @@ const manifestPath = path.resolve(path.join(__dirname, '../src/manifest.json'));
 describe('Random Container Tab', () => {
   let webExtension;
   beforeEach(async () => {
-    webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true});
+    webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true, wiring: true});
   });
 
   describe('Clicking Create Random Container in the popup', () => {
