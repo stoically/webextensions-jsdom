@@ -10,6 +10,7 @@ class WebExtensionsJSDOM {
     this.webExtensionsApiFake = new WebExtensionsApiFake(options);
     this.webExtension = {};
     this.sinon = options.sinon || sinon;
+    this.wiring = options.wiring || true;
 
     this.nyc = new nyc;
   }
@@ -132,7 +133,7 @@ class WebExtensionsJSDOM {
           that.webExtensionsApiFake.fakeApi(window.browser);
         }
 
-        if (that.webExtension.background) {
+        if (that.webExtension.background && that.wiring) {
           window.browser.runtime.sendMessage.callsFake(function() {
             const [result] = that.webExtension.background.browser.runtime.onMessage.addListener.yield(...arguments);
             return result;
