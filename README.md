@@ -114,7 +114,7 @@ const manifestPath = path.resolve(path.join(__dirname, 'path/to/manifest.json'))
 describe('Example', () => {
   let webExtension;
   beforeEach(async () => {
-    webExtension = await webExtensionsJSDOM.fromManifest(manifestPath);
+    webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {wiring: true});
   });
 
   describe('Clicking in the popup', () => {
