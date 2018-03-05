@@ -149,6 +149,15 @@ class WebExtensionsJSDOM {
       clickElementById: async (id) => {
         dom.window.document.getElementById(id).click();
         await this.nextTick();
+      },
+      clickElementByQuerySelectorAll: async (querySelector, position = 'last') => {
+        const nodeArray = Array.from(dom.window.document.querySelectorAll(querySelector));
+        switch (position) {
+        case 'last':
+          nodeArray.pop().click();
+          break;
+        }
+        await this.nextTick();
       }
     };
     this.webExtension.popup = {
