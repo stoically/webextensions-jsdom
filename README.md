@@ -18,20 +18,20 @@ const webExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/ma
 
 Given your `manifest.json` has a browser_action default_popup and background page or scripts, `webExtension` now has two properties:
 
-`background`: with properties `dom`, `browser` and `destroy`  
-`popup`: with properties `dom`, `browser` and `destroy`  
+`background`: with properties `dom`, `window`, `document`, `browser` and `destroy`  
+`popup`: with properties `dom`, `window`, `document`, `browser` and `destroy`  
 
-`dom` is a new JSDOM instance. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API Docs](#api).
+`dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API Docs](#api).
 
 
 ### Automatic wiring
 
-If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
+If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing. It's possible to pass `wiring: false` to the `fromManifest` options to disable automatic wiring.
 
 
 ### API Fake
 
-There's an option to automatically apply [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) to the `browser` stubs. It will imitate some of the WebExtensions API behavior (like an in-memory `storage`), so you don't have to manually define behavior. This is especially useful when feature-testing.
+Passing `apiFake: true` in the options to `fromManifest` automatically applies [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) to the `browser` stubs. It will imitate some of the WebExtensions API behavior (like an in-memory `storage`), so you don't have to manually define behavior. This is especially useful when feature-testing.
 
 
 ### Code Coverage
@@ -98,7 +98,7 @@ describe('Example', () => {
 
   describe('Clicking in the popup', () => {
     beforeEach(async () => {
-      await webExtension.popup.helper.clickElementById('doSomethingUseful');
+      await webExtension.popup.document.getElementById('doSomethingUseful').click();
     });
 
     it('should call the background', async () => {
@@ -120,24 +120,29 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 
 * *path* `<string>`, required, absolute path to the `manifest.json` file
 * *options* `<object>`, optional
-  * *apiFake* `<boolean>` optional, if true automatically applies API fakes to the `browser` using `webextensions-api-fake`
-  * *background* `<object>` optional, if false is given background wont be loaded
+  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
+  * *wiring* `<boolean>` optional, if `false` the [automatic wiring](#automatic-wiring) is disabled
+  * *background* `<object|false>` optional, if `false` is given background wont be loaded
     * *beforeParse(window)* `<function>` optional, JSDOM beforeParse function
     * *afterBuild(background)* `<function>` optional, executed after the dom is build
-  * *popup* `<object>` optional, if false is given popup wont be loaded
+  * *popup* `<object|false>` optional, if `false` is given popup wont be loaded
     * *beforeParse(window)* `<function>` optional, JSDOM beforeParse function
     * *afterBuild(popup)* `<function>` optional, executed after the dom is build
 
 
-Returns an Promise that resolves with an object in case of success:
+Returns a Promise that resolves with an object in case of success:
 
 * *background* `<object>`
   * *dom* `<object>` the JSDOM object
+  * *window* `<object>` shortcut to `dom.window`
+  * *document* `<object>` shortcut to `dom.window.document`
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
   * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
 
 * *popup* `<object>`
   * *dom* `<object>` the JSDOM object
+  * *window* `<object>` shortcut to `dom.window`
+  * *document* `<object>` shortcut to `dom.window.document`
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
   * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
   * *helper* `<object>`
