@@ -152,10 +152,10 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 * *options* `<object>`, optional
   * *background* `<object|false>` optional, if `false` is given background wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-    * *afterBuild(background)* `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building)
+    * *afterBuild(background)* `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building).  Can return a Promise which is resolved before continuing.
   * *popup* `<object|false>` optional, if `false` is given popup wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-    * *afterBuild(popup)* `<function>` optional, executed after the popup dom is build
+    * *afterBuild(popup)* `<function>` optional, executed after the popup dom is build. Can return a Promise which is resolved before continuing.
   * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
   * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
