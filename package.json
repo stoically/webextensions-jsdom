@@ -1,6 +1,6 @@
 {
   "name": "webextensions-jsdom",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "description": "WebExtensions JSDOM lets you easily load popup and background based on the manifest.json for testing purposes ",
   "main": "src/index.js",
   "repository": {
