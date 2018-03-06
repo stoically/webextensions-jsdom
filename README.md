@@ -16,12 +16,17 @@ const webExtensionsJSDOM = require('webextensions-jsdom');
 const webExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json');
 ```
 
-Given your `manifest.json` has a browser_action default_popup and background page or scripts, `webExtension` now has two properties:
+Based on what's given in your `manifest.json` this will create JSDOM instances with stubbed `browser` and load popup and/or background in it.
 
-`background`: with properties `dom`, `window`, `document`, `browser` and `destroy`  
-`popup`: with properties `dom`, `window`, `document`, `browser` and `destroy`  
+The resolved return value is an `<object>` with several properties:
 
-`dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API Docs](#api).
+* *background* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If background page or scripts are defined in the manifest)
+* *popup* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browserAction with default_popup is defined in the manifest)
+* *destroy* `<function>`, shortcut to `background.destroy` and `popup.destroy`
+
+`dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
+
+If you expose variables in your code on `window`, you can access them now, or trigger registered listeners by e.g. `browser.webRequest.onBeforeRequest.addListener.yield([arguments])`.
 
 
 #### Chrome Extensions
@@ -128,6 +133,10 @@ describe('Example', () => {
       });
     });
   });
+
+  afterEach(async () => {
+    await webExtension.destroy();
+  })
 });
 ```
 
@@ -160,14 +169,15 @@ Returns a Promise that resolves with an object in case of success:
   * *window* `<object>` shortcut to `dom.window`
   * *document* `<object>` shortcut to `dom.window.document`
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
-  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
+  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
 
 * *popup* `<object>`
   * *dom* `<object>` the JSDOM object
   * *window* `<object>` shortcut to `dom.window`
   * *document* `<object>` shortcut to `dom.window.document`
   * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
-  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`
+  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
   * *helper* `<object>`
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
+* *destroy* `<function>`, shortcut to call `background.destroy` and `popup.destroy`. Returns a Promise that resolves if destroying is done.

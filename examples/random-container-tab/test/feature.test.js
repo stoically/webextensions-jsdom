@@ -36,8 +36,7 @@ describe('Random Container Tab', () => {
     });
   });
 
-  afterEach(() => {
-    webExtension.popup.destroy();
-    webExtension.background.destroy();
+  afterEach(async () => {
+    await webExtension.destroy();
   });
 });

@@ -8,7 +8,17 @@ const nyc = require('./nyc');
 class WebExtensionsJSDOM {
   constructor(options = {}) {
     this.webExtensionsApiFake = new WebExtensionsApiFake(options);
-    this.webExtension = {};
+    this.webExtension = {
+      destroy: async () => {
+        if (this.webExtension.background) {
+          await this.webExtension.background.destroy();
+        }
+        if (this.webExtension.popup) {
+          await this.webExtension.popup.destroy();
+        }
+        delete this.webExtension;
+      }
+    };
     this.sinon = options.sinon || sinon;
     this.wiring = options.wiring || false;
 
@@ -202,9 +212,9 @@ const fromManifest = async (manifestFilePath, options = {}) => {
   const manifestPath = path.dirname(manifestFilePath);
   const manifest = JSON.parse(fs.readFileSync(manifestFilePath));
 
-  const webExtension = {
-    webExtensionJSDOM
-  };
+  const webExtension = webExtensionJSDOM.webExtension;
+  webExtension.webExtensionJSDOM = webExtensionJSDOM;
+
   if ((typeof options.background === 'undefined' || options.background) &&
       manifest.background &&
       (manifest.background.page || manifest.background.scripts)) {
