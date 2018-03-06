@@ -33,10 +33,9 @@ class WebExtensionsJSDOM {
       console.error(error.stack, error.detail);
     });
     const jsdomOptions = Object.assign({
-      resources: 'usable',
       virtualConsole
     }, options);
-
+    jsdomOptions.resources = 'usable';
     jsdomOptions.beforeParse = (window) => {
       this.stubWindowApis(window);
       if (options.beforeParse) {
@@ -88,7 +87,7 @@ class WebExtensionsJSDOM {
     const browser = this.webExtensionsApiFake.createBrowser();
     const that = this;
 
-    const buildDomOptions = {
+    const buildDomOptions = Object.assign({}, options.jsdom, {
       beforeParse(window) {
         window.browser = browser;
         window.chrome = browser;
@@ -96,11 +95,11 @@ class WebExtensionsJSDOM {
           that.webExtensionsApiFake.fakeApi(window.browser);
         }
 
-        if (options && options.beforeParse) {
-          options.beforeParse(window);
+        if (options.jsdom && options.jsdom.beforeParse) {
+          options.jsdom.beforeParse(window);
         }
       }
-    };
+    });
 
     let dom;
     if (background.page) {
@@ -137,7 +136,7 @@ class WebExtensionsJSDOM {
     const browser = this.webExtensionsApiFake.createBrowser();
     const that = this;
 
-    const dom = await this.buildDom({
+    const dom = await this.buildDom(Object.assign({}, options.jsdom, {
       path: popupPath,
       beforeParse(window) {
         window.browser = browser;
@@ -153,11 +152,11 @@ class WebExtensionsJSDOM {
           });
         }
 
-        if (options && options.beforeParse) {
-          options.beforeParse(window);
+        if (options.jsdom && options.jsdom.beforeParse) {
+          options.jsdom.beforeParse(window);
         }
       }
-    });
+    }));
     const helper = {
       clickElementById: async (id) => {
         dom.window.document.getElementById(id).click();
@@ -224,7 +223,7 @@ const fromManifest = async (manifestFilePath, options = {}) => {
     if (typeof options.apiFake !== 'undefined') {
       options.background.apiFake = options.apiFake;
     }
-    webExtension.background = await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
+    await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
   }
 
   if ((typeof options.popup === 'undefined' || options.popup) &&
@@ -236,7 +235,7 @@ const fromManifest = async (manifestFilePath, options = {}) => {
     if (typeof options.apiFake !== 'undefined') {
       options.popup.apiFake = options.apiFake;
     }
-    webExtension.popup = await webExtensionJSDOM.buildPopup(popupPath, options.popup);
+    await webExtensionJSDOM.buildPopup(popupPath, options.popup);
   }
 
   return webExtension;
