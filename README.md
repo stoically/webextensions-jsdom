@@ -29,19 +29,6 @@ The resolved return value is an `<object>` with several properties:
 If you expose variables in your code on `window`, you can access them now, or trigger registered listeners by e.g. `browser.webRequest.onBeforeRequest.addListener.yield([arguments])`.
 
 
-#### Chrome Extensions
-
-Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing `api: 'chrome'` to the options:
-
-```js
-await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {api: 'chrome'});
-```
-
-You get the same results but can use `chrome` instead of `browser`. However, the examples shown here are geared towards WebExtensions and use async/await syntax.
-
-Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api-fake) with the chrome api (yet).
-
-
 ### Automatic wiring
 
 If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background if you pass the `wiring: true` option. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
@@ -65,6 +52,21 @@ await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {apiFak
 Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `background` and/or `popup` are no longer needed. This should ideally be after each test.
 
 If you want to know how that's possible you can [check out this excellent article by @freaktechnik](https://humanoids.be/log/2017/10/code-coverage-reports-for-webextensions/).
+
+
+
+#### Chrome Extensions
+
+Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing `api: 'chrome'` to the options:
+
+```js
+await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {api: 'chrome'});
+```
+
+You get the same results but can use `chrome` instead of `browser`. However, the examples shown here are geared towards WebExtensions and use async/await syntax.
+
+Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api-fake) with the chrome api (yet).
+
 
 
 ### Example
