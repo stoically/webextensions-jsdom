@@ -1,6 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
 
 
 ### Installation
