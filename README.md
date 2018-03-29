@@ -1,6 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
 
 
 ### Installation
@@ -16,12 +16,13 @@ const webExtensionsJSDOM = require('webextensions-jsdom');
 const webExtension = await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json');
 ```
 
-Based on what's given in your `manifest.json` this will create JSDOM instances with stubbed `browser` and load popup and/or background in it.
+Based on what's given in your `manifest.json` this will create JSDOM instances with stubbed `browser` and load popup/sidebar/background in it.
 
 The resolved return value is an `<object>` with several properties:
 
 * *background* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If background page or scripts are defined in the manifest)
 * *popup* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browserAction with default_popup is defined in the manifest)
+* *sidebar* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebarAction with default_panel is defined in the manifest)
 * *destroy* `<function>`, shortcut to `background.destroy` and `popup.destroy`
 
 `dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
@@ -31,7 +32,7 @@ If you expose variables in your code on `window`, you can access them now, or tr
 
 ### Automatic wiring
 
-If popup *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background if you pass the `wiring: true` option. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
+If popup/sidebar *and* background are defined and loaded then `runtime.sendMessage` in the popup is automatically wired with `runtime.onMessage` in the background if you pass the `wiring: true` option. That makes it possible to e.g. "click" elements in the popup and then check if the background was called accordingly, making it ideal for feature-testing.
 
 ```js
 await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {wiring: true});
@@ -158,6 +159,9 @@ There's a fully functional example in [`examples/random-container-tab`](examples
   * *popup* `<object|false>` optional, if `false` is given popup wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
     * *afterBuild(popup)* `<function>` optional, executed after the popup dom is build. Can return a Promise which is resolved before continuing.
+  * *sidebar* `<object|false>` optional, if `false` is given sidebar wont be loaded
+    * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+    * *afterBuild(sidebar)* `<function>` optional, executed after the sidebar dom is build. Can return a Promise which is resolved before continuing.
   * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
   * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
@@ -182,4 +186,13 @@ Returns a Promise that resolves with an object in case of success:
   * *helper* `<object>`
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
-* *destroy* `<function>`, shortcut to call `background.destroy` and `popup.destroy`. Returns a Promise that resolves if destroying is done.
+* *sidebar* `<object>`
+  * *dom* `<object>` the JSDOM object
+  * *window* `<object>` shortcut to `dom.window`
+  * *document* `<object>` shortcut to `dom.window.document`
+  * *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  * *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
+  * *helper* `<object>`
+    * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
+
+* *destroy* `<function>`, shortcut to call `background.destroy`,`popup.destroy` and `sidebar.destroy`. Returns a Promise that resolves if destroying is done.
