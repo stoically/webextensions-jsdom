@@ -16,6 +16,9 @@ class WebExtensionsJSDOM {
         if (this.webExtension.popup) {
           await this.webExtension.popup.destroy();
         }
+        if (this.webExtension.sidebar) {
+          await this.webExtension.sidebar.destroy();
+        }
         delete this.webExtension;
       }
     };
@@ -191,6 +194,65 @@ class WebExtensionsJSDOM {
     return this.webExtension.popup;
   }
 
+  async buildSidebar(sidebarPath, options = {}) {
+    const browser = this.webExtensionsApiFake.createBrowser();
+    const that = this;
+
+    const dom = await this.buildDom(Object.assign({}, options.jsdom, {
+      path: sidebarPath,
+      beforeParse(window) {
+        window.browser = browser;
+        window.chrome = browser;
+        if (options.apiFake) {
+          that.webExtensionsApiFake.fakeApi(window.browser);
+        }
+
+        if (that.webExtension.background && that.wiring) {
+          window.browser.runtime.sendMessage.callsFake(function() {
+            const [result] = that.webExtension.background.browser.runtime.onMessage.addListener.yield(...arguments);
+            return result;
+          });
+        }
+
+        if (options.jsdom && options.jsdom.beforeParse) {
+          options.jsdom.beforeParse(window);
+        }
+      }
+    }));
+    const helper = {
+      clickElementById: async (id) => {
+        dom.window.document.getElementById(id).click();
+        await this.nextTick();
+      },
+      clickElementByQuerySelectorAll: async (querySelector, position = 'last') => {
+        const nodeArray = Array.from(dom.window.document.querySelectorAll(querySelector));
+        switch (position) {
+        case 'last':
+          nodeArray.pop().click();
+          break;
+        }
+        await this.nextTick();
+      }
+    };
+    this.webExtension.sidebar = {
+      browser,
+      chrome: browser,
+      dom,
+      window: dom.window,
+      document: dom.window.document,
+      helper,
+      destroy: async () => {
+        await this.nyc.writeCoverage(dom.window);
+        dom.window.close();
+        delete this.webExtension.sidebar;
+      }
+    };
+    if (options && options.afterBuild) {
+      await options.afterBuild(this.webExtension.sidebar);
+    }
+    return this.webExtension.sidebar;
+  }
+
   stubWindowApis(window) {
     window.fetch = this.sinon.stub().resolves({
       json: this.sinon.stub().resolves({})
@@ -236,6 +298,18 @@ const fromManifest = async (manifestFilePath, options = {}) => {
       options.popup.apiFake = options.apiFake;
     }
     await webExtensionJSDOM.buildPopup(popupPath, options.popup);
+  }
+
+  if ((typeof options.sidebar === 'undefined' || options.sidebar) &&
+      manifest.sidebar_action && manifest.sidebar_action.default_panel) {
+    const sidebarPath = path.resolve(manifestPath, manifest.sidebar_action.default_panel);
+    if (typeof options.sidebar !== 'object') {
+      options.sidebar = {};
+    }
+    if (typeof options.apiFake !== 'undefined') {
+      options.sidebar.apiFake = options.apiFake;
+    }
+    await webExtensionJSDOM.buildSidebar(sidebarPath, options.sidebar);
   }
 
   return webExtension;
