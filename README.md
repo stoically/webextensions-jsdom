@@ -21,8 +21,8 @@ Based on what's given in your `manifest.json` this will create JSDOM instances w
 The resolved return value is an `<object>` with several properties:
 
 * *background* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If background page or scripts are defined in the manifest)
-* *popup* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browserAction with default_popup is defined in the manifest)
-* *sidebar* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebarAction with default_panel is defined in the manifest)
+* *popup* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browser_action with default_popup is defined in the manifest)
+* *sidebar* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebar_action with default_panel is defined in the manifest)
 * *destroy* `<function>`, shortcut to `background.destroy` and `popup.destroy`
 
 `dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
@@ -155,13 +155,13 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 * *options* `<object>`, optional
   * *background* `<object|false>` optional, if `false` is given background wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-    * *afterBuild(background)* `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building).  Can return a Promise which is resolved before continuing.
+    * *afterBuild(background)* `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building). If a Promise is returned it will be resolved before continuing.
   * *popup* `<object|false>` optional, if `false` is given popup wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-    * *afterBuild(popup)* `<function>` optional, executed after the popup dom is build. Can return a Promise which is resolved before continuing.
+    * *afterBuild(popup)* `<function>` optional, executed after the popup dom is build. If a Promise is returned it will be resolved before continuing.
   * *sidebar* `<object|false>` optional, if `false` is given sidebar wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-    * *afterBuild(sidebar)* `<function>` optional, executed after the sidebar dom is build. Can return a Promise which is resolved before continuing.
+    * *afterBuild(sidebar)* `<function>` optional, executed after the sidebar dom is build. If a Promise is returned it will be resolved before continuing.
   * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
   * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
