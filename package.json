@@ -1,11 +1,11 @@
 {
   "name": "webextensions-jsdom",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Load popup, sidebar and background with JSDOM based on the manifest.json for testing purposes",
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stoically/webextensions-jsdom.git"
+    "url": "git+https://github.com/webexts/webextensions-jsdom.git"
   },
   "dependencies": {
     "jsdom": "^11.6.2",
@@ -19,10 +19,10 @@
   "peerDependencies": {
     "sinon": ">=4.4.0"
   },
-  "homepage": "https://github.com/stoically/webextensions-jsdom",
+  "homepage": "https://github.com/webexts/webextensions-jsdom",
   "author": "stoically <stoically@protonmail.com>",
   "bugs": {
-    "url": "https://github.com/stoically/webextensions-jsdom/issues"
+    "url": "https://github.com/webexts/webextensions-jsdom/issues"
   },
   "license": "MPL-2.0"
 }
