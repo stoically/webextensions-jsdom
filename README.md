@@ -56,7 +56,7 @@ If you want to know how that's possible you can [check out this excellent articl
 
 
 
-#### Chrome Extensions
+### Chrome Extensions
 
 Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing `api: 'chrome'` to the options:
 
@@ -168,7 +168,7 @@ There's a fully functional example in [`examples/random-container-tab`](examples
   * *sinon* `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
 
 
-Returns a Promise that resolves with an object in case of success:
+Returns a Promise that resolves an `<object>` with the following properties in case of success:
 
 * *background* `<object>`
   * *dom* `<object>` the JSDOM object
@@ -196,3 +196,8 @@ Returns a Promise that resolves with an object in case of success:
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
 * *destroy* `<function>`, shortcut to call `background.destroy`,`popup.destroy` and `sidebar.destroy`. Returns a Promise that resolves if destroying is done.
+
+
+### GeckoDriver
+
+If you're looking for a way to do functional testing with GeckoDriver then [`webextensions-geckodriver`](https://github.com/webexts/webextensions-geckodriver) might be for you.
