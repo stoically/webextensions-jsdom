@@ -1,5 +1,7 @@
 ### WebExtensions JSDOM
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/webexts/webextensions-jsdom.svg)](https://greenkeeper.io/)
+
 When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
 
 
