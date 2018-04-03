@@ -10,6 +10,9 @@ class WebExtensionsJSDOM {
     this.webExtensionsApiFake = new WebExtensionsApiFake(options);
     this.webExtension = {
       destroy: async () => {
+        if (!this.webExtension) {
+          return;
+        }
         if (this.webExtension.background) {
           await this.webExtension.background.destroy();
         }
