@@ -1,6 +1,6 @@
 {
   "name": "webextensions-jsdom",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Load popup, sidebar and background with JSDOM based on the manifest.json for testing purposes",
   "main": "src/index.js",
   "repository": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "jsdom": "^11.6.2",
     "mkdirp": "^0.5.1",
-    "webextensions-api-fake": "^0.3.3"
+    "webextensions-api-fake": "^0.5.0"
   },
   "devDependencies": {
     "eslint": "^4.18.2",
