@@ -40,12 +40,27 @@ class WebExtensionsJSDOM {
     });
     const jsdomOptions = Object.assign({
       virtualConsole
-    }, options);
+    }, options.jsdom);
     jsdomOptions.resources = 'usable';
+    const that = this;
+    const browser = options.browser || this.webExtensionsApiFake.createBrowser();
     jsdomOptions.beforeParse = (window) => {
-      this.stubWindowApis(window);
-      if (options.beforeParse) {
-        options.beforeParse(window);
+      window.browser = browser;
+      window.chrome = browser;
+
+      that.stubWindowApis(window);
+      if (options.apiFake) {
+        that.webExtensionsApiFake.fakeApi(window.browser);
+      }
+      if (that.webExtension.background && that.wiring) {
+        window.browser.runtime.sendMessage.callsFake(function() {
+          const [result] = that.webExtension.background.browser.runtime.onMessage.addListener.yield(...arguments);
+          return result;
+        });
+      }
+
+      if (options.jsdom && options.jsdom.beforeParse) {
+        options.jsdom.beforeParse(window);
       }
     };
 
@@ -79,7 +94,21 @@ class WebExtensionsJSDOM {
     }
 
     await this.nextTick();
-    return dom;
+    const webExtension = {
+      browser,
+      chrome: browser,
+      dom,
+      window: dom.window,
+      document: dom.window.document,
+      destroy: async () => {
+        await this.nyc.writeCoverage(dom.window);
+        dom.window.close();
+      }
+    };
+    if (options && options.afterBuild) {
+      await options.afterBuild(webExtension);
+    }
+    return webExtension;
   }
 
   htmlTemplate(scripts = []) {
@@ -91,168 +120,54 @@ class WebExtensionsJSDOM {
 
   async buildBackground(background, manifestPath, options = {}) {
     const browser = this.webExtensionsApiFake.createBrowser();
-    const that = this;
-
-    const buildDomOptions = Object.assign({}, options.jsdom, {
-      beforeParse(window) {
-        window.browser = browser;
-        window.chrome = browser;
-        if (options.apiFake) {
-          that.webExtensionsApiFake.fakeApi(window.browser);
-        }
-
-        if (options.jsdom && options.jsdom.beforeParse) {
-          options.jsdom.beforeParse(window);
-        }
-      }
-    });
+    options.browser = browser;
 
     let dom;
     if (background.page) {
-      const backgroundPath = path.resolve(manifestPath, background.page);
-      buildDomOptions.path = backgroundPath;
-      dom = await this.buildDom(buildDomOptions);
+      options.path = path.resolve(manifestPath, background.page);
+      dom = await this.buildDom(options);
     } else if (background.scripts) {
       const scripts = [];
       for (const script of background.scripts) {
         scripts.push(path.resolve(path.join(manifestPath, script)));
       }
-      dom = await this.buildDom(buildDomOptions, scripts);
+      dom = await this.buildDom(options, scripts);
     }
 
-    this.webExtension.background = {
-      browser,
-      chrome: browser,
-      dom,
-      window: dom.window,
-      document: dom.window.document,
-      destroy: async () => {
-        await this.nyc.writeCoverage(dom.window);
-        dom.window.close();
-        delete this.webExtension.background;
-      }
+    this.webExtension.background = dom;
+    this.webExtension.background.destroy = () => {
+      delete this.webExtension.background;
     };
-    if (options && options.afterBuild) {
-      await options.afterBuild(this.webExtension.background);
-    }
     return this.webExtension.background;
   }
 
   async buildPopup(popupPath, options = {}) {
     const browser = this.webExtensionsApiFake.createBrowser();
-    const that = this;
+    options.browser = browser;
+    options.path = popupPath;
 
-    const dom = await this.buildDom(Object.assign({}, options.jsdom, {
-      path: popupPath,
-      beforeParse(window) {
-        window.browser = browser;
-        window.chrome = browser;
-        if (options.apiFake) {
-          that.webExtensionsApiFake.fakeApi(window.browser);
-        }
+    const dom = await this.buildDom(options);
 
-        if (that.webExtension.background && that.wiring) {
-          window.browser.runtime.sendMessage.callsFake(function() {
-            const [result] = that.webExtension.background.browser.runtime.onMessage.addListener.yield(...arguments);
-            return result;
-          });
-        }
-
-        if (options.jsdom && options.jsdom.beforeParse) {
-          options.jsdom.beforeParse(window);
-        }
-      }
-    }));
-    const helper = {
-      clickElementById: async (id) => {
-        dom.window.document.getElementById(id).click();
-        await this.nextTick();
-      },
-      clickElementByQuerySelectorAll: async (querySelector, position = 'last') => {
-        const nodeArray = Array.from(dom.window.document.querySelectorAll(querySelector));
-        switch (position) {
-        case 'last':
-          nodeArray.pop().click();
-          break;
-        }
-        await this.nextTick();
-      }
+    this.webExtension.popup = dom;
+    this.webExtension.popup.helper = this.helper(dom);
+    this.webExtension.popup.destroy = () => {
+      delete this.webExtension.popup;
     };
-    this.webExtension.popup = {
-      browser,
-      chrome: browser,
-      dom,
-      window: dom.window,
-      document: dom.window.document,
-      helper,
-      destroy: async () => {
-        await this.nyc.writeCoverage(dom.window);
-        dom.window.close();
-        delete this.webExtension.popup;
-      }
-    };
-    if (options && options.afterBuild) {
-      await options.afterBuild(this.webExtension.popup);
-    }
     return this.webExtension.popup;
   }
 
   async buildSidebar(sidebarPath, options = {}) {
     const browser = this.webExtensionsApiFake.createBrowser();
-    const that = this;
+    options.browser = browser;
+    options.path = sidebarPath;
 
-    const dom = await this.buildDom(Object.assign({}, options.jsdom, {
-      path: sidebarPath,
-      beforeParse(window) {
-        window.browser = browser;
-        window.chrome = browser;
-        if (options.apiFake) {
-          that.webExtensionsApiFake.fakeApi(window.browser);
-        }
+    const dom = await this.buildDom(options);
 
-        if (that.webExtension.background && that.wiring) {
-          window.browser.runtime.sendMessage.callsFake(function() {
-            const [result] = that.webExtension.background.browser.runtime.onMessage.addListener.yield(...arguments);
-            return result;
-          });
-        }
-
-        if (options.jsdom && options.jsdom.beforeParse) {
-          options.jsdom.beforeParse(window);
-        }
-      }
-    }));
-    const helper = {
-      clickElementById: async (id) => {
-        dom.window.document.getElementById(id).click();
-        await this.nextTick();
-      },
-      clickElementByQuerySelectorAll: async (querySelector, position = 'last') => {
-        const nodeArray = Array.from(dom.window.document.querySelectorAll(querySelector));
-        switch (position) {
-        case 'last':
-          nodeArray.pop().click();
-          break;
-        }
-        await this.nextTick();
-      }
+    this.webExtension.sidebar = dom;
+    this.webExtension.sidebar.helper = this.helper(dom);
+    this.webExtension.sidebar.destroy = () => {
+      delete this.webExtension.sidebar;
     };
-    this.webExtension.sidebar = {
-      browser,
-      chrome: browser,
-      dom,
-      window: dom.window,
-      document: dom.window.document,
-      helper,
-      destroy: async () => {
-        await this.nyc.writeCoverage(dom.window);
-        dom.window.close();
-        delete this.webExtension.sidebar;
-      }
-    };
-    if (options && options.afterBuild) {
-      await options.afterBuild(this.webExtension.sidebar);
-    }
     return this.webExtension.sidebar;
   }
 
@@ -260,6 +175,24 @@ class WebExtensionsJSDOM {
     window.fetch = this.sinon.stub().resolves({
       json: this.sinon.stub().resolves({})
     });
+  }
+
+  helper(dom) {
+    return {
+      clickElementById: async (id) => {
+        dom.window.document.getElementById(id).click();
+        await this.nextTick();
+      },
+      clickElementByQuerySelectorAll: async (querySelector, position = 'last') => {
+        const nodeArray = Array.from(dom.window.document.querySelectorAll(querySelector));
+        switch (position) {
+        case 'last':
+          nodeArray.pop().click();
+          break;
+        }
+        await this.nextTick();
+      }
+    };
   }
 
   nextTick() {
@@ -272,6 +205,9 @@ class WebExtensionsJSDOM {
 }
 
 const fromManifest = async (manifestFilePath, options = {}) => {
+  options = Object.assign({
+    autoload: true
+  }, options);
   const webExtensionJSDOM = new WebExtensionsJSDOM(options);
   const manifestPath = path.dirname(manifestFilePath);
   const manifest = JSON.parse(fs.readFileSync(manifestFilePath));
@@ -279,7 +215,7 @@ const fromManifest = async (manifestFilePath, options = {}) => {
   const webExtension = webExtensionJSDOM.webExtension;
   webExtension.webExtensionJSDOM = webExtensionJSDOM;
 
-  if ((typeof options.background === 'undefined' || options.background) &&
+  if (options.autoload && (typeof options.background === 'undefined' || options.background) &&
       manifest.background &&
       (manifest.background.page || manifest.background.scripts)) {
     if (typeof options.background !== 'object') {
@@ -291,7 +227,7 @@ const fromManifest = async (manifestFilePath, options = {}) => {
     await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
   }
 
-  if ((typeof options.popup === 'undefined' || options.popup) &&
+  if (options.autoload && (typeof options.popup === 'undefined' || options.popup) &&
       manifest.browser_action && manifest.browser_action.default_popup) {
     const popupPath = path.resolve(manifestPath, manifest.browser_action.default_popup);
     if (typeof options.popup !== 'object') {
@@ -303,7 +239,7 @@ const fromManifest = async (manifestFilePath, options = {}) => {
     await webExtensionJSDOM.buildPopup(popupPath, options.popup);
   }
 
-  if ((typeof options.sidebar === 'undefined' || options.sidebar) &&
+  if (options.autoload && (typeof options.sidebar === 'undefined' || options.sidebar) &&
       manifest.sidebar_action && manifest.sidebar_action.default_panel) {
     const sidebarPath = path.resolve(manifestPath, manifest.sidebar_action.default_panel);
     if (typeof options.sidebar !== 'object') {
@@ -318,7 +254,15 @@ const fromManifest = async (manifestFilePath, options = {}) => {
   return webExtension;
 };
 
+const fromFile = (path, options = {}) => {
+  const webExtensionJSDOM = new WebExtensionsJSDOM(options);
+  return webExtensionJSDOM.buildDom(Object.assign(options, {
+    path
+  }));
+};
+
 module.exports = {
   fromManifest,
+  fromFile,
   WebExtensionsJSDOM
 };

@@ -50,7 +50,7 @@ await webExtensionsJSDOM.fromManifest('/absolute/path/to/manifest.json', {apiFak
 
 ### Code Coverage
 
-Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `background` and/or `popup` are no longer needed. This should ideally be after each test.
+Code coverage with [nyc / istanbul](https://istanbul.js.org/) is supported if you execute the test using `webextensions-jsdom` with `nyc`. To get coverage-output you need to call the exposed `destroy` function after the `background`, `popup` and/or `sidebar` are no longer needed. This should ideally be after each test.
 
 If you want to know how that's possible you can [check out this excellent article by @freaktechnik](https://humanoids.be/log/2017/10/code-coverage-reports-for-webextensions/).
 
@@ -162,6 +162,7 @@ There's a fully functional example in [`examples/random-container-tab`](examples
   * *sidebar* `<object|false>` optional, if `false` is given sidebar wont be loaded
     * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
     * *afterBuild(sidebar)* `<function>` optional, executed after the sidebar dom is build. If a Promise is returned it will be resolved before continuing.
+  * *autoload* `<boolean>` optional, if `false` will not automatically load background/popup/sidebar (might be useful for `loadURL`)
   * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
   * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
@@ -196,6 +197,26 @@ Returns a Promise that resolves an `<object>` with the following properties in c
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
 * *destroy* `<function>`, shortcut to call `background.destroy`,`popup.destroy` and `sidebar.destroy`. Returns a Promise that resolves if destroying is done.
+
+
+#### Exported function fromFile(path[, options])
+
+Load an arbitrary `.html` file, accepts the following parameters:
+
+* *path* `<string>`, required, absolute path to the html file that should be loaded
+* *options* `<object>`, optional, accepts the following parameters
+  * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
+  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
+  * *jsdom* `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+  * *sinon* `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
+
+Returns a Promise that resolves an `<object>` with the following properties in case of success:
+
+* *dom* `<object>` the JSDOM object
+* *window* `<object>` shortcut to `dom.window`
+* *document* `<object>` shortcut to `dom.window.document`
+* *browser* `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+* *destroy* `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
 
 
 ### GeckoDriver
