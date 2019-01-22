@@ -27,7 +27,7 @@ class nyc {
     if (process.env.NYC_CONFIG) {
       this.running = true;
       this._nyc_config = JSON.parse(process.env.NYC_CONFIG);
-      this._instrumentsCachePath = path.resolve(path.join(this._nyc_config.tempDirectory, 'instruments'));
+      this._instrumentsCachePath = path.resolve(path.join(this._nyc_config.tempDir, 'instruments'));
       mkdirp(this._instrumentsCachePath);
     }
   }
