@@ -135,9 +135,6 @@ class WebExtensionsJSDOM {
     }
 
     this.webExtension.background = dom;
-    this.webExtension.background.destroy = () => {
-      delete this.webExtension.background;
-    };
     return this.webExtension.background;
   }
 
@@ -150,9 +147,6 @@ class WebExtensionsJSDOM {
 
     this.webExtension.popup = dom;
     this.webExtension.popup.helper = this.helper(dom);
-    this.webExtension.popup.destroy = () => {
-      delete this.webExtension.popup;
-    };
     return this.webExtension.popup;
   }
 
@@ -165,9 +159,6 @@ class WebExtensionsJSDOM {
 
     this.webExtension.sidebar = dom;
     this.webExtension.sidebar.helper = this.helper(dom);
-    this.webExtension.sidebar.destroy = () => {
-      delete this.webExtension.sidebar;
-    };
     return this.webExtension.sidebar;
   }
 

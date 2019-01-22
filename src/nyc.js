@@ -105,7 +105,7 @@ class nyc {
     }
     const jsonFile = `${crypto.randomBytes(32).toString('hex')}.json`;
     const coverageJson = JSON.stringify(window.__coverage__);
-    await writeFile(path.join(this._nyc_config.tempDirectory, jsonFile), coverageJson, 'utf-8');
+    await writeFile(path.join(this._nyc_config.tempDir, jsonFile), coverageJson, 'utf-8');
   }
 }
 
