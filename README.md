@@ -23,7 +23,7 @@ The resolved return value is an `<object>` with several properties:
 * *background* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If background page or scripts are defined in the manifest)
 * *popup* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browser_action with default_popup is defined in the manifest)
 * *sidebar* `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebar_action with default_panel is defined in the manifest)
-* *destroy* `<function>`, shortcut to `background.destroy` and `popup.destroy`
+* *destroy* `<function>`, shortcut to `background.destroy`, `popup.destroy` and `sidebar.destroy`
 
 `dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
 
@@ -164,7 +164,7 @@ There's a fully functional example in [`examples/random-container-tab`](examples
     * *afterBuild(sidebar)* `<function>` optional, executed after the sidebar dom is build. If a Promise is returned it will be resolved before continuing.
   * *autoload* `<boolean>` optional, if `false` will not automatically load background/popup/sidebar (might be useful for `loadURL`)
   * *api* `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
-  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
+  * *apiFake* `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) and if `path/_locales` is present its content will get passed down to api-fake.
   * *wiring* `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
   * *sinon* `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
 
@@ -197,7 +197,6 @@ Returns a Promise that resolves an `<object>` with the following properties in c
     * *clickElementById(id)* `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
 
 * *destroy* `<function>`, shortcut to call `background.destroy`,`popup.destroy` and `sidebar.destroy`. Returns a Promise that resolves if destroying is done.
-
 
 #### Exported function fromFile(path[, options])
 

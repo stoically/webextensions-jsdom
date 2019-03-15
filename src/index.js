@@ -195,13 +195,44 @@ class WebExtensionsJSDOM {
   }
 }
 
+const _getLocales = manifestPath => {
+  const locales = {};
+  const localesPath = path.join(manifestPath, '_locales');
+  try {
+    fs.accessSync(localesPath);
+    const localesPaths = fs.readdirSync(localesPath);
+    localesPaths.map(locale => {
+      const messagesFile = path.join(localesPath, locale, 'messages.json');
+      try {
+        const messagesJson = fs.readFileSync(messagesFile);
+        locales[locale.replace('_', '-')] = JSON.parse(messagesJson);
+      } catch (error) {
+        return;
+      }
+
+    });
+  } catch (error) {
+    return;
+  }
+  return Object.keys(locales) ? locales : undefined;
+};
+
 const fromManifest = async (manifestFilePath, options = {}) => {
   options = Object.assign({
     autoload: true
   }, options);
-  const webExtensionJSDOM = new WebExtensionsJSDOM(options);
+
   const manifestPath = path.dirname(manifestFilePath);
   const manifest = JSON.parse(fs.readFileSync(manifestFilePath));
+
+  if (options.apiFake && !options.locales) {
+    options.locales = _getLocales(manifestPath);
+  }
+  if (!options.default_locale) {
+    options.default_locale = manifest.default_locale;
+  }
+
+  const webExtensionJSDOM = new WebExtensionsJSDOM(options);
 
   const webExtension = webExtensionJSDOM.webExtension;
   webExtension.webExtensionJSDOM = webExtensionJSDOM;
