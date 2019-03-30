@@ -113,7 +113,7 @@ class WebExtensionsJSDOM {
 
   htmlTemplate(scripts = []) {
     const scriptTags = scripts.map(script => {
-      return `<script src="${script}"></script>`;
+      return `<script src="file://${script}"></script>`;
     }).join('');
     return `<!DOCTYPE html><html><head></head><body>${scriptTags}</body></html>`;
   }
