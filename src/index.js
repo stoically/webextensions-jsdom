@@ -102,6 +102,9 @@ class WebExtensionsJSDOM {
       document: dom.window.document,
       destroy: async () => {
         await this.nyc.writeCoverage(dom.window);
+        if (browser.flush) {
+          browser.flush();
+        }
         dom.window.close();
       }
     };
