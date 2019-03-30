@@ -10,14 +10,14 @@
   "dependencies": {
     "jsdom": "^14.0.0",
     "mkdirp": "^0.5.1",
-    "webextensions-api-fake": "^0.6.0"
+    "webextensions-api-fake": "^0.7.0"
   },
   "devDependencies": {
-    "eslint": "^5.15.3",
+    "eslint": "^5.16.0",
     "mocha": "^6.0.2"
   },
   "peerDependencies": {
-    "sinon": ">=7.3.0"
+    "sinon": ">=7.3.1"
   },
   "homepage": "https://github.com/webexts/webextensions-jsdom",
   "author": "stoically <stoically@protonmail.com>",
