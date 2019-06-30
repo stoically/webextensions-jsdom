@@ -221,3 +221,10 @@ Returns a Promise that resolves an `<object>` with the following properties in c
 ### GeckoDriver
 
 If you're looking for a way to do functional testing with GeckoDriver then [`webextensions-geckodriver`](https://github.com/webexts/webextensions-geckodriver) might be for you.
+
+### Sinon useFakeTimers
+
+```js
+sinon.useFakeTimers({toFake:['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval']});
+```
+- https://stackoverflow.com/a/50152624

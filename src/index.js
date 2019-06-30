@@ -190,11 +190,7 @@ class WebExtensionsJSDOM {
   }
 
   nextTick() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        process.nextTick(resolve);
-      });
-    });
+    return new Promise(process.nextTick);
   }
 }
 
