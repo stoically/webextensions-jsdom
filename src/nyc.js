@@ -27,7 +27,7 @@ class nyc {
     if (process.env.NYC_CONFIG) {
       this.running = true;
       this._nyc_config = JSON.parse(process.env.NYC_CONFIG);
-      this._instrumentsCachePath = path.resolve(path.join(this._nyc_config.tempDir, 'instruments'));
+      this._instrumentsCachePath = path.join(this._nyc_config.tempDir, 'instruments');
       mkdirp(this._instrumentsCachePath);
     }
   }
@@ -76,6 +76,11 @@ class nyc {
 
 
   async instrument(sourcePath) {
+    if (process.platform === 'win32') {
+      sourcePath = sourcePath.replace(/^\//, '');
+    }
+    sourcePath = path.relative(process.cwd(), sourcePath);
+
     if (instrumentCache.has(sourcePath)) {
       return instrumentCache.get(sourcePath);
     }
@@ -83,8 +88,7 @@ class nyc {
     // huge files with a lot of stdout make problems otherwise
     const sourceMd5 = crypto.createHash('md5').update(sourcePath).digest('hex');
     const instrumentCachePath = path.join(this._instrumentsCachePath, sourceMd5);
-    await execFile(process.execPath, [
-      './node_modules/.bin/nyc',
+    await execFile('nyc', [
       'instrument',
       sourcePath,
       '>',
