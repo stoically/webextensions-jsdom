@@ -10,7 +10,7 @@
   "dependencies": {
     "jsdom": "^14.0.0",
     "mkdirp": "^0.5.1",
-    "webextensions-api-fake": "^0.9.0"
+    "webextensions-api-fake": "^0.9.1"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
