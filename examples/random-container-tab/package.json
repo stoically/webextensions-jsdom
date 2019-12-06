@@ -9,9 +9,10 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.0.2",
-    "nyc": "^13.3.0",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
-    "webextensions-jsdom": "^0.18.0"
+    "webextensions-jsdom": "^0.18.1"
   }
 }
