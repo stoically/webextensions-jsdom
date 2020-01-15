@@ -52,6 +52,8 @@ class nyc {
       scriptsSource += ";\n;";
     }
 
+    if (options.script) { scriptsSource += `${options.script}`; }
+
     let refireStatechangeEvents = dom.window.document.readyState === 'complete';
 
     dom.window.eval(scriptsSource);

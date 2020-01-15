@@ -72,6 +72,7 @@ class WebExtensionsJSDOM {
       } else {
         dom = new jsdom.JSDOM(this.htmlTemplate(scripts), jsdomOptions);
       }
+      if (options.script) { dom.window.eval(options.script); }
     } else {
       dom = await this.nyc.buildDom(options, scripts, jsdomOptions);
     }
