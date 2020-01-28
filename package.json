@@ -1,6 +1,6 @@
 {
   "name": "webextensions-jsdom",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Load popup, sidebar and background with JSDOM based on the manifest.json for testing purposes",
   "main": "src/index.js",
   "repository": {
