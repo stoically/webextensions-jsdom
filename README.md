@@ -1,6 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`sinon-chrome/webextensions`](https://github.com/acvetkov/sinon-chrome).
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`webextensions-api-mock`](https://github.com/stoically/webextensions-api-mock).
 
 ### Installation
 
@@ -28,7 +28,7 @@ The resolved return value is an `<object>` with several properties:
 - _sidebar_ `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebar_action with default_panel is defined in the manifest)
 - _destroy_ `<function>`, shortcut to `background.destroy`, `popup.destroy` and `sidebar.destroy`
 
-`dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `sinon-chrome/webextensions` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
+`dom` is a new JSDOM instance. `window` is a shortcut to `dom.window`. `document` is a shortcut to `dom.window.document`. `browser` is a new `webextensions-api-mock` instance that is also exposed on `dom.window.browser`. And `destroy` is a function to clean up. More infos in the [API docs](#api).
 
 If you expose variables in your code on `window`, you can access them now, or trigger registered listeners by e.g. `browser.webRequest.onBeforeRequest.addListener.yield([arguments])`.
 
@@ -60,17 +60,7 @@ If you want to know how that's possible you can [check out this excellent articl
 
 ### Chrome Extensions
 
-Chrome Extensions are also supported. Just instruct WebExtensions JSDOM to create a `sinon-chrome/extensions` stub instead by passing `api: 'chrome'` to the options:
-
-```js
-await webExtensionsJSDOM.fromManifest("/absolute/path/to/manifest.json", {
-  api: "chrome"
-});
-```
-
-You get the same results but can use `chrome` instead of `browser`. However, the examples shown here are geared towards WebExtensions and use async/await syntax.
-
-Note: You can't use the [Automatic wiring](#automatic-wiring) or [API Fake](#api-fake) with the chrome api (yet).
+Not supported, but you could use [webextension-polyfill](https://github.com/mozilla/webextension-polyfill).
 
 ### Example
 
@@ -170,10 +160,8 @@ There's a fully functional example in [`examples/random-container-tab`](examples
     - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
     - _afterBuild(sidebar)_ `<function>` optional, executed after the sidebar dom is build. If a Promise is returned it will be resolved before continuing.
   - _autoload_ `<boolean>` optional, if `false` will not automatically load background/popup/sidebar (might be useful for `loadURL`)
-  - _api_ `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   - _apiFake_ `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) and if `path/_locales` is present its content will get passed down to api-fake.
   - _wiring_ `<boolean>` optional, if `true` the [automatic wiring](#automatic-wiring) is enabled
-  - _sinon_ `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
 
 Returns a Promise that resolves an `<object>` with the following properties in case of success:
 
@@ -182,7 +170,7 @@ Returns a Promise that resolves an `<object>` with the following properties in c
   - _dom_ `<object>` the JSDOM object
   - _window_ `<object>` shortcut to `dom.window`
   - _document_ `<object>` shortcut to `dom.window.document`
-  - _browser_ `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  - _browser_ `<object>` stubbed `browser` using `webextensions-api-mock`
   - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
 
 - _popup_ `<object>`
@@ -190,7 +178,7 @@ Returns a Promise that resolves an `<object>` with the following properties in c
   - _dom_ `<object>` the JSDOM object
   - _window_ `<object>` shortcut to `dom.window`
   - _document_ `<object>` shortcut to `dom.window.document`
-  - _browser_ `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  - _browser_ `<object>` stubbed `browser` using `webextensions-api-mock`
   - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
   - _helper_ `<object>`
     - _clickElementById(id)_ `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
@@ -200,7 +188,7 @@ Returns a Promise that resolves an `<object>` with the following properties in c
   - _dom_ `<object>` the JSDOM object
   - _window_ `<object>` shortcut to `dom.window`
   - _document_ `<object>` shortcut to `dom.window.document`
-  - _browser_ `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+  - _browser_ `<object>` stubbed `browser` using `webextensions-api-mock`
   - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
   - _helper_ `<object>`
     - _clickElementById(id)_ `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
@@ -213,17 +201,15 @@ Load an arbitrary `.html` file, accepts the following parameters:
 
 - _path_ `<string>`, required, absolute path to the html file that should be loaded
 - _options_ `<object>`, optional, accepts the following parameters
-  - _api_ `<string>`, optional, if `chrome` is given it will create a `sinon-chrome/extensions` stub instead
   - _apiFake_ `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
   - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
-  - _sinon_ `<object>`, optional, a sinon instance, if given `sinon-chrome` will use it to create the stub. useful if you run into [problems with `sinon.match`](https://github.com/acvetkov/sinon-chrome/issues/67#issuecomment-370255632)
 
 Returns a Promise that resolves an `<object>` with the following properties in case of success:
 
 - _dom_ `<object>` the JSDOM object
 - _window_ `<object>` shortcut to `dom.window`
 - _document_ `<object>` shortcut to `dom.window.document`
-- _browser_ `<object>` stubbed `browser` using `sinon-chrome/webextensions`
+- _browser_ `<object>` stubbed `browser` using `webextensions-api-mock`
 - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
 
 ### GeckoDriver
