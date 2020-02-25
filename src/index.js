@@ -154,6 +154,18 @@ class WebExtensionsJSDOM {
     return this.webExtension.popup;
   }
 
+  async buildPageActionPopup(pageActionPath, options = {}) {
+    const browser = this.webExtensionsApiFake.createBrowser();
+    options.browser = browser;
+    options.path = pageActionPath;
+
+    const dom = await this.buildDom(options);
+
+    this.webExtension.pageActionPopup = dom;
+    this.webExtension.pageActionPopup.helper = this.helper(dom);
+    return this.webExtension.pageActionPopup;
+  }
+
   async buildSidebar(sidebarPath, options = {}) {
     const browser = this.webExtensionsApiFake.createBrowser();
     options.browser = browser;
@@ -237,40 +249,54 @@ const fromManifest = async (manifestFilePath, options = {}) => {
   const webExtension = webExtensionJSDOM.webExtension;
   webExtension.webExtensionJSDOM = webExtensionJSDOM;
 
-  if (options.autoload && (typeof options.background === 'undefined' || options.background) &&
-      manifest.background &&
-      (manifest.background.page || manifest.background.scripts)) {
-    if (typeof options.background !== 'object') {
-      options.background = {};
+  if (options.autoload) {
+    if ((typeof options.background === 'undefined' || options.background) &&
+        manifest.background &&
+        (manifest.background.page || manifest.background.scripts)) {
+      if (typeof options.background !== 'object') {
+        options.background = {};
+      }
+      if (typeof options.apiFake !== 'undefined') {
+        options.background.apiFake = options.apiFake;
+      }
+      await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
     }
-    if (typeof options.apiFake !== 'undefined') {
-      options.background.apiFake = options.apiFake;
-    }
-    await webExtensionJSDOM.buildBackground(manifest.background, manifestPath, options.background);
-  }
 
-  if (options.autoload && (typeof options.popup === 'undefined' || options.popup) &&
-      manifest.browser_action && manifest.browser_action.default_popup) {
-    const popupPath = path.resolve(manifestPath, manifest.browser_action.default_popup);
-    if (typeof options.popup !== 'object') {
-      options.popup = {};
+    if ((typeof options.popup === 'undefined' || options.popup) &&
+        manifest.browser_action && manifest.browser_action.default_popup) {
+      const popupPath = path.resolve(manifestPath, manifest.browser_action.default_popup);
+      if (typeof options.popup !== 'object') {
+        options.popup = {};
+      }
+      if (typeof options.apiFake !== 'undefined') {
+        options.popup.apiFake = options.apiFake;
+      }
+      await webExtensionJSDOM.buildPopup(popupPath, options.popup);
     }
-    if (typeof options.apiFake !== 'undefined') {
-      options.popup.apiFake = options.apiFake;
-    }
-    await webExtensionJSDOM.buildPopup(popupPath, options.popup);
-  }
 
-  if (options.autoload && (typeof options.sidebar === 'undefined' || options.sidebar) &&
-      manifest.sidebar_action && manifest.sidebar_action.default_panel) {
-    const sidebarPath = path.resolve(manifestPath, manifest.sidebar_action.default_panel);
-    if (typeof options.sidebar !== 'object') {
-      options.sidebar = {};
+    if ((typeof options.pageActionPopup === 'undefined' || options.pageActionPopup) &&
+        manifest.page_action && manifest.page_action.default_popup) {
+      const pageActionPath = path.resolve(manifestPath, manifest.page_action.default_popup);
+      if (typeof options.pageAction !== 'object') {
+        options.pageAction = {};
+      }
+      if (typeof options.apiFake !== 'undefined') {
+        options.pageAction.apiFake = options.apiFake;
+      }
+      await webExtensionJSDOM.buildPageActionPopup(pageActionPath, options.pageActionPopup);
     }
-    if (typeof options.apiFake !== 'undefined') {
-      options.sidebar.apiFake = options.apiFake;
+
+    if ((typeof options.sidebar === 'undefined' || options.sidebar) &&
+        manifest.sidebar_action && manifest.sidebar_action.default_panel) {
+      const sidebarPath = path.resolve(manifestPath, manifest.sidebar_action.default_panel);
+      if (typeof options.sidebar !== 'object') {
+        options.sidebar = {};
+      }
+      if (typeof options.apiFake !== 'undefined') {
+        options.sidebar.apiFake = options.apiFake;
+      }
+      await webExtensionJSDOM.buildSidebar(sidebarPath, options.sidebar);
     }
-    await webExtensionJSDOM.buildSidebar(sidebarPath, options.sidebar);
   }
 
   return webExtension;

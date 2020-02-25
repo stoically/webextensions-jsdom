@@ -15,6 +15,10 @@
     "default_popup": "popup.html"
   },
 
+  "page_action": {
+    "default_popup": "popup.html"
+  },
+
   "background": {
     "page": "background.html"
   }

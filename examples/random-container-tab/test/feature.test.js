@@ -13,7 +13,7 @@ describe('Random Container Tab', () => {
     webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true, wiring: true});
   });
 
-  describe('Clicking Create Random Container in the popup', () => {
+  describe('Clicking Create Random Container in the browser_action popup', () => {
     beforeEach(async () => {
       await webExtension.popup.helper.clickElementById('createRandomContainer');
     });
@@ -33,6 +33,16 @@ describe('Random Container Tab', () => {
           cookieStoreId: createdRandomContainer.cookieStoreId
         });
       });
+    });
+  });
+
+  describe('Clicking Create Random Container in the page_action popup', () => {
+    beforeEach(async () => {
+      await webExtension.pageActionPopup.helper.clickElementById('createRandomContainer');
+    });
+
+    it('should create a container in the browser', async () => {
+      expect(webExtension.background.browser.contextualIdentities.create).to.have.been.calledOnce;
     });
   });
 

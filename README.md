@@ -1,6 +1,6 @@
 ### WebExtensions JSDOM
 
-When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`webextensions-api-mock`](https://github.com/stoically/webextensions-api-mock).
+When testing [WebExtensions](https://developer.mozilla.org/Add-ons/WebExtensions) you might want to test your browser_action/page_action default_popup, sidebar_action default_panel or background page/scripts inside [JSDOM](https://github.com/jsdom/jsdom). This package lets you do that based on the `manifest.json`. It will automatically stub `window.browser` with [`webextensions-api-mock`](https://github.com/stoically/webextensions-api-mock).
 
 ### Installation
 
@@ -25,6 +25,7 @@ The resolved return value is an `<object>` with several properties:
 
 - _background_ `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If background page or scripts are defined in the manifest)
 - _popup_ `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If browser_action with default_popup is defined in the manifest)
+- _pageActionPopup_ `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If page_action with default_popup is defined in the manifest)
 - _sidebar_ `<object>`, with properties `dom`, `window`, `document`, `browser` and `destroy` (If sidebar_action with default_panel is defined in the manifest)
 - _destroy_ `<function>`, shortcut to `background.destroy`, `popup.destroy` and `sidebar.destroy`
 
@@ -155,6 +156,8 @@ There's a fully functional example in [`examples/random-container-tab`](examples
     - _afterBuild(background)_ `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building). If a Promise is returned it will be resolved before continuing.
   - _popup_ `<object|false>` optional, if `false` is given popup wont be loaded
     - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+  - _pageActionPopup_ `<object|false>` optional, if `false` is given popup wont be loaded
+    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
     - _afterBuild(popup)_ `<function>` optional, executed after the popup dom is build. If a Promise is returned it will be resolved before continuing.
   - _sidebar_ `<object|false>` optional, if `false` is given sidebar wont be loaded
     - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
@@ -174,6 +177,16 @@ Returns a Promise that resolves an `<object>` with the following properties in c
   - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
 
 - _popup_ `<object>`
+
+  - _dom_ `<object>` the JSDOM object
+  - _window_ `<object>` shortcut to `dom.window`
+  - _document_ `<object>` shortcut to `dom.window.document`
+  - _browser_ `<object>` stubbed `browser` using `webextensions-api-mock`
+  - _destroy_ `<function>` destroy the `dom` and potentially write coverage data if executed with `nyc`. Returns a Promise that resolves if destroying is done.
+  - _helper_ `<object>`
+    - _clickElementById(id)_ `<function>` shortcut for `dom.window.document.getElementById(id).click();`, returns a promise
+
+- _pageActionPopup_ `<object>`
 
   - _dom_ `<object>` the JSDOM object
   - _window_ `<object>` shortcut to `dom.window`
