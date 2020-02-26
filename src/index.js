@@ -278,11 +278,11 @@ const fromManifest = async (manifestFilePath, options = {}) => {
     if ((typeof options.pageActionPopup === 'undefined' || options.pageActionPopup) &&
         manifest.page_action && manifest.page_action.default_popup) {
       const pageActionPath = path.resolve(manifestPath, manifest.page_action.default_popup);
-      if (typeof options.pageAction !== 'object') {
-        options.pageAction = {};
+      if (typeof options.pageActionPopup !== 'object') {
+        options.pageActionPopup = {};
       }
       if (typeof options.apiFake !== 'undefined') {
-        options.pageAction.apiFake = options.apiFake;
+        options.pageActionPopup.apiFake = options.apiFake;
       }
       await webExtensionJSDOM.buildPageActionPopup(pageActionPath, options.pageActionPopup);
     }
