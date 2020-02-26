@@ -152,15 +152,15 @@ There's a fully functional example in [`examples/random-container-tab`](examples
 - _path_ `<string>`, required, absolute path to the `manifest.json` file
 - _options_ `<object>`, optional
   - _background_ `<object|false>` optional, if `false` is given background wont be loaded
-    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: Setting  `resources` or `runScripts` might lead to unexpected behavior.
     - _afterBuild(background)_ `<function>` optional, executed directly after the background dom is build (might be useful to do things before the popup dom starts building). If a Promise is returned it will be resolved before continuing.
   - _popup_ `<object|false>` optional, if `false` is given popup wont be loaded
-    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: Setting  `resources` or `runScripts` might lead to unexpected behavior.
   - _pageActionPopup_ `<object|false>` optional, if `false` is given popup wont be loaded
-    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: Setting  `resources` or `runScripts` might lead to unexpected behavior.
     - _afterBuild(popup)_ `<function>` optional, executed after the popup dom is build. If a Promise is returned it will be resolved before continuing.
   - _sidebar_ `<object|false>` optional, if `false` is given sidebar wont be loaded
-    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+    - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: Setting  `resources` or `runScripts` might lead to unexpected behavior.
     - _afterBuild(sidebar)_ `<function>` optional, executed after the sidebar dom is build. If a Promise is returned it will be resolved before continuing.
   - _autoload_ `<boolean>` optional, if `false` will not automatically load background/popup/sidebar (might be useful for `loadURL`)
   - _apiFake_ `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake) and if `path/_locales` is present its content will get passed down to api-fake.
@@ -215,7 +215,7 @@ Load an arbitrary `.html` file, accepts the following parameters:
 - _path_ `<string>`, required, absolute path to the html file that should be loaded
 - _options_ `<object>`, optional, accepts the following parameters
   - _apiFake_ `<boolean>` optional, if `true` automatically applies [API fakes](#api-fake) to the `browser` using [`webextensions-api-fake`](https://github.com/stoically/webextensions-api-fake)
-  - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: You can't set `resources` or `runScripts`.
+  - _jsdom_ `<object>`, optional, this will set all given properties as [options for the JSDOM constructor](https://github.com/jsdom/jsdom#customizing-jsdom), an useful example might be [`beforeParse(window)`](https://github.com/jsdom/jsdom#intervening-before-parsing). Note: Setting  `resources` or `runScripts`. might lead to unexpected behavior
 
 Returns a Promise that resolves an `<object>` with the following properties in case of success:
 

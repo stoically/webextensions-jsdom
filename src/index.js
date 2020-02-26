@@ -39,9 +39,10 @@ class WebExtensionsJSDOM {
       console.error(error.stack, error.detail);
     });
     const jsdomOptions = Object.assign({
+      resources: 'usable',
       virtualConsole
     }, options.jsdom);
-    jsdomOptions.resources = 'usable';
+
     const that = this;
     const browser = options.browser || this.webExtensionsApiFake.createBrowser();
     jsdomOptions.beforeParse = (window) => {
