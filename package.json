@@ -8,7 +8,7 @@
     "url": "git+https://github.com/webexts/webextensions-jsdom.git"
   },
   "dependencies": {
-    "jsdom": "^16.0.1",
+    "jsdom": "^20.0.0",
     "mkdirp": "^1.0.3",
     "webextensions-api-fake": "^1.2.0"
   },
